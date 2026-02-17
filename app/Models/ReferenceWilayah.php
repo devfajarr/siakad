@@ -72,7 +72,7 @@ class ReferenceWilayah extends Model
      */
     public static function getKabupatenByProvinsi($idProvinsi)
     {
-        return self::where('id_induk_wilayah', $idProvinsi)
+        return self::where('id_induk_wilayah', 'like', trim($idProvinsi) . '%')
             ->where('id_level_wilayah', 2)
             ->orderBy('nama_wilayah')
             ->get();
@@ -83,9 +83,73 @@ class ReferenceWilayah extends Model
      */
     public static function getKecamatanByKabupaten($idKabupaten)
     {
-        return self::where('id_induk_wilayah', $idKabupaten)
+        return self::where('id_induk_wilayah', 'like', trim($idKabupaten) . '%')
             ->where('id_level_wilayah', 3)
             ->orderBy('nama_wilayah')
             ->get();
+    }
+
+    /**
+     * Find a wilayah by ID with trimming (handles trailing spaces from API).
+     */
+    public static function findByIdTrimmed(?string $id): ?self
+    {
+        if (empty($id)) {
+            return null;
+        }
+
+        return self::whereRaw('TRIM(id_wilayah) = ?', [trim($id)])->first();
+    }
+
+    /**
+     * Resolve the full hierarchy (Kecamatan -> Kabupaten -> Provinsi) from a kecamatan id_wilayah.
+     * Returns an array with keys: kecamatan, kabupaten, provinsi (each is a ReferenceWilayah or null).
+     */
+    public static function resolveHierarchy(?string $idWilayah): array
+    {
+        $result = [
+            'kecamatan' => null,
+            'kabupaten' => null,
+            'provinsi' => null,
+        ];
+
+        if (empty($idWilayah)) {
+            return $result;
+        }
+
+        // Step 1: Find Kecamatan
+        $kecamatan = self::whereRaw('TRIM(id_wilayah) = ?', [trim($idWilayah)])
+            ->where('id_level_wilayah', 3)
+            ->first();
+
+        if (!$kecamatan) {
+            \Log::warning("Wilayah: Kecamatan not found for id_wilayah: [{$idWilayah}]");
+            return $result;
+        }
+        $result['kecamatan'] = $kecamatan;
+
+        // Step 2: Find Kabupaten (parent of Kecamatan)
+        $kabupaten = self::whereRaw('TRIM(id_wilayah) = ?', [trim($kecamatan->id_induk_wilayah)])
+            ->where('id_level_wilayah', 2)
+            ->first();
+
+        if (!$kabupaten) {
+            \Log::warning("Wilayah: Kabupaten not found for id_induk: [{$kecamatan->id_induk_wilayah}]");
+            return $result;
+        }
+        $result['kabupaten'] = $kabupaten;
+
+        // Step 3: Find Provinsi (parent of Kabupaten)
+        $provinsi = self::whereRaw('TRIM(id_wilayah) = ?', [trim($kabupaten->id_induk_wilayah)])
+            ->where('id_level_wilayah', 1)
+            ->first();
+
+        if (!$provinsi) {
+            \Log::warning("Wilayah: Provinsi not found for id_induk: [{$kabupaten->id_induk_wilayah}]");
+            return $result;
+        }
+        $result['provinsi'] = $provinsi;
+
+        return $result;
     }
 }

@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Mahasiswa extends Model
 {
     protected $table = 'mahasiswas';
-
     // Allow mass assignment for all except ID (handled by Auto-Increment)
     protected $guarded = ['id'];
 
@@ -49,4 +48,30 @@ class Mahasiswa extends Model
     {
         return $this->hasMany(RiwayatPendidikan::class, 'id_mahasiswa', 'id');
     }
+
+    // Relationships needed for Detail View
+    public function agama()
+    {
+        return $this->belongsTo(Agama::class, 'id_agama', 'id_agama');
+    }
+
+    public function jenisTinggal()
+    {
+        return $this->belongsTo(JenisTinggal::class, 'id_jenis_tinggal', 'id_jenis_tinggal');
+    }
+
+    public function alatTransportasi()
+    {
+        return $this->belongsTo(AlatTransportasi::class, 'id_alat_transportasi', 'id_alat_transportasi');
+    }
+
+    public function wilayah()
+    {
+        return $this->belongsTo(ReferenceWilayah::class, 'id_wilayah', 'id_wilayah');
+    }
+
+    // Note: Parent education/job/income are stored as IDs on this table (e.g. id_pekerjaan_ayah), 
+    // so we don't usually map them as 'pekerjaan' (singular) for the student.
+    // If needed specifically for ayah/ibu, we can add:
+    // public function pekerjaanAyah() { return $this->belongsTo(Pekerjaan::class, 'id_pekerjaan_ayah', 'id_pekerjaan'); }
 }

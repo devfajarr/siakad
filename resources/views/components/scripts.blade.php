@@ -12,6 +12,7 @@
 <!-- endbuild -->
 
 <!-- Vendors JS -->
+<script src="{{ asset('assets/vendor/libs/sweetalert2/sweetalert2.js') }}"></script>
 
 <!-- Main JS -->
 <script src="{{ asset('assets/js/main.js') }}"></script>

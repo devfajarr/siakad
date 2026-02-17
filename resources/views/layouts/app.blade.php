@@ -50,6 +50,7 @@
     <!-- / Layout wrapper -->
 
     <x-scripts />
+    <x-alerts.sweetalert />
 </body>
 
 </html>
