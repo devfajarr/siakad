@@ -89,5 +89,10 @@
                 <div data-i18n="Data Dosen">Data Dosen</div>
             </a>
         </li>
+
+        <!-- Perkuliahan -->
+        <li class="menu-header mt-5 small text-uppercase">
+            <span class="menu-header-text">Perkuliahan</span>
+        </li>
     </ul>
 </aside>

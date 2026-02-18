@@ -22,8 +22,7 @@
                         <i class="ri-refresh-line me-1"></i> Sync Dosen
                     </button>
                 </form>
-                <button type="button" class="btn btn-primary waves-effect waves-light" data-bs-toggle="modal"
-                    data-bs-target="#addDosenModal">
+                <button type="button" class="btn btn-primary waves-effect waves-light" id="btnAddDosen">
                     <i class="ri-add-line me-1"></i> Add Dosen
                 </button>
             </div>
@@ -33,8 +32,8 @@
             <table id="dosenTable" class="table table-bordered table-hover text-nowrap">
                 <thead class="table-light">
                     <tr>
-                        <th width="80px">Action</th>
-                        <th width="50px">No.</th>
+                        <th>Sumber Data</th>
+                        <th>Action</th>
                         <th>Nama</th>
                         <th>NIDN</th>
                         <th>NIP</th>
@@ -48,16 +47,38 @@
                     @foreach ($dosen as $index => $item)
                         <tr>
                             <td>
+                                @if ($item->status_sinkronisasi == 'pusat')
+                                    <span class="badge bg-label-info rounded-pill">Pusat</span>
+                                @else
+                                    <span class="badge bg-label-success rounded-pill">Lokal</span>
+                                @endif
+                            </td>
+                            <td>
                                 <div class="d-flex gap-1">
-                                    <a href="#" class="btn btn-icon btn-sm btn-info rounded-pill" title="Detail">
+                                    {{-- View Button (Available for all) --}}
+                                    <button type="button" class="btn btn-icon btn-sm btn-info rounded-pill btn-view"
+                                        title="Detail" data-dosen="{{ json_encode($item) }}">
                                         <i class="ri-eye-line"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-icon btn-sm btn-warning rounded-pill" title="Edit">
-                                        <i class="ri-pencil-line"></i>
-                                    </a>
+                                    </button>
+
+                                    {{-- Edit & Delete (Only for Lokal) --}}
+                                    @if ($item->status_sinkronisasi != 'pusat')
+                                        <button type="button" class="btn btn-icon btn-sm btn-warning rounded-pill btn-edit"
+                                            title="Edit" data-dosen="{{ json_encode($item) }}">
+                                            <i class="ri-pencil-line"></i>
+                                        </button>
+                                        <form action="{{ route('admin.dosen.destroy', $item->id) }}" method="POST"
+                                            class="d-inline form-delete">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="btn btn-icon btn-sm btn-danger rounded-pill btn-delete"
+                                                title="Hapus">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
-                            <td>{{ $index + 1 }}</td>
                             <td>
                                 <span class="fw-semibold text-primary">{{ $item->nama }}</span>
                             </td>
@@ -102,78 +123,8 @@
         </div>
     </div>
 
-    {{-- Add Dosen Modal --}}
-    <div class="modal fade" id="addDosenModal" tabindex="-1" aria-labelledby="addDosenModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addDosenModalLabel">
-                        <i class="ri-user-add-line me-2"></i>Tambah Dosen Baru
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formAddDosen">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label" for="dosenNama">Nama <span class="text-danger">*</span></label>
-                                <input type="text" id="dosenNama" class="form-control" placeholder="Nama lengkap" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="dosenNidn">NIDN</label>
-                                <input type="text" id="dosenNidn" class="form-control"
-                                    placeholder="Nomor Induk Dosen Nasional" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="dosenNip">NIP</label>
-                                <input type="text" id="dosenNip" class="form-control" placeholder="Nomor Induk Pegawai" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="dosenEmail">Email</label>
-                                <input type="email" id="dosenEmail" class="form-control" placeholder="email@domain.com" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="dosenJk">Jenis Kelamin</label>
-                                <select id="dosenJk" class="form-select">
-                                    <option value="">-- Pilih --</option>
-                                    <option value="L">Laki - Laki</option>
-                                    <option value="P">Perempuan</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="dosenAgama">Agama</label>
-                                <select id="dosenAgama" class="form-select">
-                                    <option value="">-- Pilih --</option>
-                                    @foreach ($agamaList as $agama)
-                                        <option value="{{ $agama->id_agama }}">{{ $agama->nama_agama }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="dosenTglLahir">Tanggal Lahir</label>
-                                <input type="date" id="dosenTglLahir" class="form-control" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="dosenStatus">Status</label>
-                                <select id="dosenStatus" class="form-select">
-                                    <option value="1">Aktif</option>
-                                    <option value="0">Tidak Aktif</option>
-                                </select>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <i class="ri-close-line me-1"></i> Batal
-                    </button>
-                    <button type="button" class="btn btn-primary">
-                        <i class="ri-save-line me-1"></i> Simpan
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('dosen._modal')
+    @include('dosen._view_modal')
 @endsection
 
 @push('scripts')
@@ -227,6 +178,81 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         document.getElementById('syncForm').submit();
+                    }
+                });
+            });
+
+            // Handle Add Button
+            $('#btnAddDosen').on('click', function () {
+                $('#dosenModalLabel span').text('Tambah Dosen Baru');
+                $('#formDosen').attr('action', "{{ route('admin.dosen.store') }}");
+                $('#methodField').html(''); // Clear hidden field
+                $('#formDosen')[0].reset();
+                $('#dosenModal').modal('show');
+            });
+
+            // Handle Edit Button
+            $('.btn-edit').on('click', function () {
+                const data = $(this).data('dosen');
+                const updateUrl = "{{ route('admin.dosen.update', ':id') }}".replace(':id', data.id);
+
+                $('#dosenModalLabel span').text('Edit Dosen Lokal');
+                $('#formDosen').attr('action', updateUrl);
+                $('#methodField').html('<input type="hidden" name="_method" value="PUT">');
+
+                // Populate Form
+                $('#dosenNama').val(data.nama);
+                $('#dosenNidn').val(data.nidn);
+                $('#dosenNip').val(data.nip);
+                $('#dosenEmail').val(data.email);
+                $('#dosenJk').val(data.jenis_kelamin);
+                $('#dosenAgama').val(data.id_agama);
+                $('#dosenTglLahir').val(data.tanggal_lahir ? data.tanggal_lahir.split('T')[0] : '');
+                $('#dosenTempatLahir').val(data.tempat_lahir);
+                $('#dosenStatus').val(data.is_active ? 1 : 0);
+
+                $('#dosenModal').modal('show');
+            });
+
+            // Handle View Button (for Pusat & Lokal)
+            $('.btn-view').on('click', function () {
+                const data = $(this).data('dosen');
+                const modal = $('#viewDosenModal');
+
+                // Populate View Modal Inputs (all are disabled)
+                modal.find('#dosenNama').val(data.nama);
+                modal.find('#dosenNidn').val(data.nidn);
+                modal.find('#dosenNip').val(data.nip);
+                modal.find('#dosenEmail').val(data.email);
+                modal.find('#dosenJk').val(data.jenis_kelamin);
+                modal.find('#dosenAgama').val(data.id_agama);
+                modal.find('#dosenTglLahir').val(data.tanggal_lahir ? data.tanggal_lahir.split('T')[0] : '');
+                modal.find('#dosenTempatLahir').val(data.tempat_lahir);
+                modal.find('#dosenStatus').val(data.is_active ? 1 : 0);
+
+                modal.modal('show');
+            });
+
+            // Delete Confirmation
+            $('.btn-delete').on('click', function (e) {
+                e.preventDefault();
+                const form = $(this).closest('form');
+
+                Swal.fire({
+                    title: 'Hapus Dosen?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        confirmButton: 'btn btn-danger me-3',
+                        cancelButton: 'btn btn-label-secondary'
+                    },
+                    buttonsStyling: false
+                }).then(function (result) {
+                    if (result.value) {
+                        form.submit();
                     }
                 });
             });

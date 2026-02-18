@@ -36,19 +36,19 @@ class DosenController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StoreDosenRequest $request)
     {
-        //
+        Dosen::create($request->validated() + [
+            'status_sinkronisasi' => 'lokal',
+            'external_id' => null,
+            'is_struktural' => false,
+            'is_pengajar' => true,
+        ]);
+
+        return redirect()->route('admin.dosen.index')
+            ->with('success', 'Dosen lokal berhasil ditambahkan.');
     }
 
     /**
@@ -56,7 +56,7 @@ class DosenController extends Controller
      */
     public function show(string $id)
     {
-        //
+        // Not used, view is handled via modal
     }
 
     /**
@@ -64,22 +64,34 @@ class DosenController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        // Not used, edit is handled via modal
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(\App\Http\Requests\UpdateDosenRequest $request, Dosen $dosen)
     {
-        //
+        // Guard is already handled in FormRequest authorize()
+
+        $dosen->update($request->validated());
+
+        return redirect()->route('admin.dosen.index')
+            ->with('success', 'Data dosen berhasil diperbarui.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Dosen $dosen)
     {
-        //
+        if ($dosen->status_sinkronisasi !== 'lokal') {
+            abort(403, 'Data dosen dari sistem pusat tidak dapat dihapus.');
+        }
+
+        $dosen->delete();
+
+        return redirect()->route('admin.dosen.index')
+            ->with('success', 'Dosen berhasil dihapus.');
     }
 }
