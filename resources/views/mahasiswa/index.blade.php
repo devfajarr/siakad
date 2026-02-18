@@ -30,7 +30,6 @@
                 <div class="d-flex gap-2">
                     <button class="btn btn-outline-secondary"><i class="ri-filter-3-line me-1"></i> FILTER / SORT</button>
                     <a href="{{ route('admin.mahasiswa.create') }}" class="btn btn-primary"><i class="ri-add-line me-1"></i> TAMBAH</a>
-                    <button class="btn btn-dark"><i class="ri-add-line me-1"></i> TAMBAH HISTORI LAMPAU</button>
                 </div>
                 <div class="text-muted d-flex align-items-center">
                     Halaman ini menampilkan data berdasarkan angkatan : <span class="badge bg-warning text-dark ms-1">2023</span>

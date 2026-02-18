@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DosenController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\RiwayatPendidikanMahasiswaController;
 
@@ -30,6 +31,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('riwayat-pendidikan', RiwayatPendidikanMahasiswaController::class)
         ->only(['store', 'edit', 'update', 'destroy']);
 
+    // Dosen Sync & CRUD
+    Route::post('dosen/sync', [DosenController::class, 'sync'])->name('dosen.sync');
+    Route::resource('dosen', DosenController::class);
+
     Route::get('/api/prodi-by-pt/{id_perguruan_tinggi}', [RiwayatPendidikanMahasiswaController::class, 'getProdiByPt'])
         ->name('api.prodi-by-pt');
 
@@ -42,4 +47,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/kecamatan/{kabupaten}', 'getKecamatan')->name('kecamatan');
             Route::get('/search/negara', 'searchNegara')->name('search.negara');
         });
+
+
 });

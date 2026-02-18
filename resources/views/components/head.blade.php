@@ -2,7 +2,7 @@
 <meta name="viewport"
     content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-<title>@yield('title', 'Dashboard') | Materialize - Material Design HTML Admin Template</title>
+<title>@yield('title', 'Dashboard') | {{ config('app.name' ?? 'SIAKAD') }}</title>
 
 <meta name="description" content="@yield('description', '')" />
 

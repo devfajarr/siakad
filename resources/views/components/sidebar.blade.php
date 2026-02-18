@@ -79,8 +79,14 @@
         <!-- Data Mahasiswa -->
         <li class="menu-item {{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}">
             <a href="{{ route('admin.mahasiswa.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons ri-user-line"></i>
+                <i class="menu-icon tf-icons ri-graduation-cap-line"></i>
                 <div data-i18n="Data Mahasiswa">Data Mahasiswa</div>
+            </a>
+        </li>
+        <li class="menu-item {{ request()->routeIs('admin.dosen.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.dosen.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ri-user-line"></i>
+                <div data-i18n="Data Dosen">Data Dosen</div>
             </a>
         </li>
     </ul>
