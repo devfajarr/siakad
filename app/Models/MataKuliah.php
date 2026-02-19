@@ -43,13 +43,15 @@ class MataKuliah extends Model
         'status_sinkronisasi',
         'is_deleted_server',
         'last_synced_at',
-        'sync_version',
+        'last_push_at',
+        'sync_error_message',
     ];
 
     protected $casts = [
         'status_aktif' => 'boolean',
         'is_deleted_server' => 'boolean',
         'last_synced_at' => 'datetime',
+        'last_push_at' => 'datetime',
         'tanggal_mulai_efektif' => 'date',
         'tanggal_akhir_efektif' => 'date',
         'sks' => 'decimal:2',
@@ -65,6 +67,8 @@ class MataKuliah extends Model
     const STATUS_UPDATED_LOCAL = 'updated_local';
     const STATUS_DELETED_LOCAL = 'deleted_local';
     const STATUS_PENDING_PUSH = 'pending_push';
+    const STATUS_PUSH_SUCCESS = 'push_success';
+    const STATUS_PUSH_FAILED = 'push_failed';
 
     /**
      * Scope a query to only include active mata kuliah.

@@ -17,10 +17,13 @@ class Kurikulum extends Model
     const STATUS_UPDATED_LOCAL = 'updated_local';
     const STATUS_DELETED_LOCAL = 'deleted_local';
     const STATUS_PENDING_PUSH = 'pending_push';
+    const STATUS_PUSH_SUCCESS = 'push_success';
+    const STATUS_PUSH_FAILED = 'push_failed';
 
     protected $casts = [
         'is_deleted_server' => 'boolean',
         'last_synced_at' => 'datetime',
+        'last_push_at' => 'datetime',
         'jumlah_sks_lulus' => 'integer',
         'jumlah_sks_wajib' => 'integer',
         'jumlah_sks_pilihan' => 'integer',

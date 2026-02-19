@@ -212,4 +212,133 @@ class AkademikRefService extends NeoFeederService
             'fungsi' => $fungsi,
         ]);
     }
+
+    // ─── Kelas Kuliah ───────────────────────────────────────
+
+    /**
+     * Mengambil daftar Kelas Kuliah.
+     *
+     * @param string $filter
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     * @throws \Exception
+     */
+    public function getListKelasKuliah(string $filter = '', int $limit = 0, int $offset = 0): array
+    {
+        return $this->sendRequest('GetListKelasKuliah', [
+            'filter' => $filter,
+            'limit' => $limit,
+            'offset' => $offset,
+            'order' => '',
+        ]);
+    }
+
+    /**
+     * Mengambil detail Kelas Kuliah berdasarkan id_kelas_kuliah.
+     *
+     * @param string $idKelasKuliah
+     * @return array
+     * @throws \Exception
+     */
+    public function getDetailKelasKuliah(string $idKelasKuliah): array
+    {
+        return $this->sendRequest('GetDetailKelasKuliah', [
+            'filter' => "id_kelas_kuliah='{$idKelasKuliah}'",
+        ]);
+    }
+
+    /**
+     * Mengambil jumlah data Kelas Kuliah.
+     *
+     * @param string $filter
+     * @return int
+     * @throws \Exception
+     */
+    public function getCountKelasKuliah(string $filter = ''): int
+    {
+        $response = $this->sendRequest('GetCountKelasKuliah', [
+            'filter' => $filter,
+        ]);
+
+        return (int) ($response['total'] ?? $response);
+    }
+
+    // ─── Peserta Kelas Kuliah ──────────────────────────────
+
+    /**
+     * Mengambil daftar peserta kelas kuliah.
+     *
+     * @param string $filter Filter, biasanya "id_kelas_kuliah='...'"
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     * @throws \Exception
+     */
+    public function getPesertaKelasKuliah(string $filter = '', int $limit = 0, int $offset = 0): array
+    {
+        return $this->sendRequest('GetPesertaKelasKuliah', [
+            'filter' => $filter,
+            'limit' => $limit,
+            'offset' => $offset,
+            'order' => '',
+        ]);
+    }
+
+    // ─── Dosen Pengajar Kelas Kuliah ──────────────────────
+
+    /**
+     * Mengambil daftar dosen pengajar kelas kuliah.
+     *
+     * @param string $filter Filter, biasanya "id_kelas_kuliah='...'"
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     * @throws \Exception
+     */
+    public function getDosenPengajarKelasKuliah(string $filter = '', int $limit = 0, int $offset = 0): array
+    {
+        return $this->sendRequest('GetDosenPengajarKelasKuliah', [
+            'filter' => $filter,
+            'limit' => $limit,
+            'offset' => $offset,
+            'order' => '',
+        ]);
+    }
+
+    // ─── Nilai Perkuliahan ────────────────────────────────
+
+    /**
+     * Mengambil daftar nilai perkuliahan per kelas.
+     *
+     * @param string $filter Filter, biasanya "id_kelas_kuliah='...'"
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     * @throws \Exception
+     */
+    public function getListNilaiPerkuliahanKelas(string $filter = '', int $limit = 0, int $offset = 0): array
+    {
+        return $this->sendRequest('GetListNilaiPerkuliahanKelas', [
+            'filter' => $filter,
+            'limit' => $limit,
+            'offset' => $offset,
+            'order' => '',
+        ]);
+    }
+
+    /**
+     * Mengambil detail nilai perkuliahan per kelas.
+     *
+     * @param string $filter
+     * @return array
+     * @throws \Exception
+     */
+    public function getDetailNilaiPerkuliahanKelas(string $filter = ''): array
+    {
+        return $this->sendRequest('GetDetailNilaiPerkuliahanKelas', [
+            'filter' => $filter,
+        ]);
+    }
 }
+

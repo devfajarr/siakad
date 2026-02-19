@@ -166,7 +166,6 @@ class SyncMataKuliahFromServer extends Command
             'status_sinkronisasi' => 'synced',
             'is_deleted_server' => false,
             'last_synced_at' => now(),
-            // 'sync_version' => $item['version'] ?? null,
         ];
 
         // Gunakan updateOrCreate dengan kondisi unik (prioritas id_matkul, fallback kode_mk logic handled partly by DB constraint)
