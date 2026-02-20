@@ -80,4 +80,9 @@ class Dosen extends Model
     {
         return $this->hasMany(DosenRiwayatPenelitian::class, 'id_dosen');
     }
+
+    public function kelasDosen(): HasMany
+    {
+        return $this->hasMany(KelasDosen::class, 'dosen_id');
+    }
 }

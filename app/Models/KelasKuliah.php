@@ -151,6 +151,14 @@ class KelasKuliah extends Model
     }
 
     /**
+     * Relasi ke dosen pengajar lokal via tabel kelas_dosen.
+     */
+    public function kelasDosen(): HasMany
+    {
+        return $this->hasMany(KelasDosen::class, 'kelas_kuliah_id');
+    }
+
+    /**
      * Relasi ke Peserta Kelas Kuliah (KRS).
      */
     public function pesertaKelasKuliah(): HasMany

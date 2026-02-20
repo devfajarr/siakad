@@ -107,15 +107,11 @@
                 <div data-i18n="Kurikulum">Kurikulum</div>
             </a>
         </li>
-<<<<<<< HEAD
-
         <li class="menu-item {{ request()->routeIs('admin.kelas-kuliah.*') ? 'active' : '' }}">
             <a href="{{ route('admin.kelas-kuliah.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons ri-chalkboard-line"></i>
+                <i class="menu-icon tf-icons ri-artboard-line"></i>
                 <div data-i18n="Kelas Perkuliahan">Kelas Perkuliahan</div>
             </a>
         </li>
-=======
->>>>>>> 92caf8229d7c8912a8b22952b660f48ac1ac0ccd
     </ul>
 </aside>

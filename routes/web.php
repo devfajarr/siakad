@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DosenController;
+use App\Http\Controllers\DosenPengajarKelasController;
 use App\Http\Controllers\KurikulumController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MataKuliahController;
@@ -61,4 +62,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/search/negara', 'searchNegara')->name('search.negara');
         });
 
+});
+
+Route::prefix('admin')->group(function () {
+    Route::post('kelas-dosen', [DosenPengajarKelasController::class, 'store'])->name('kelas.dosen.store');
+    Route::delete('kelas-dosen/{kelas_dosen}', [DosenPengajarKelasController::class, 'destroy'])->name('kelas.dosen.destroy');
 });
