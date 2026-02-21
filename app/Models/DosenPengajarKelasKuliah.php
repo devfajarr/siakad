@@ -12,6 +12,14 @@ class DosenPengajarKelasKuliah extends Model
 
     protected $table = 'dosen_pengajar_kelas_kuliah';
 
+    // ─── Constants ──────────────────────────────────────────
+    public const JENIS_EVALUASI = [
+        '1' => 'Evaluasi Akademik',
+        '2' => 'Aktivitas Partisipatif',
+        '3' => 'Hasil Proyek',
+        '4' => 'Kognitif / Pengetahuan',
+    ];
+
     // ─── Sync Status Constants ──────────────────────────────
     const STATUS_SYNCED = 'synced';
 
@@ -33,16 +41,22 @@ class DosenPengajarKelasKuliah extends Model
         'id_dosen',
         'id_registrasi_dosen',
         // Dosen Alias
-        'id_dosen_alias',
-        'id_registrasi_dosen_alias',
+        'id_dosen_alias',           // FK ke dosens.id (Pusat - untuk push)
+        'id_registrasi_dosen_alias', // external_id dosen alias (Pusat - untuk push)
+        'id_dosen_alias_lokal',     // FK ke dosens.id (Lokal - untuk Select2 Alias)
+        'dosen_alias',              // Nama dosen honorer (Lokal - backup string)
         // Data Mengajar
         'sks_substansi',
         'rencana_minggu_pertemuan',
         'realisasi_minggu_pertemuan',
+        'jenis_evaluasi',
         'substansi_pilar',
-        // Monitoring
+        // Monitoring Sinkronisasi
         'sumber_data',
         'status_sinkronisasi',
+        'sync_action',
+        'is_local_change',
+        'is_deleted_local',
         'is_deleted_server',
         'last_synced_at',
         'last_push_at',
@@ -54,6 +68,8 @@ class DosenPengajarKelasKuliah extends Model
         'rencana_minggu_pertemuan' => 'integer',
         'realisasi_minggu_pertemuan' => 'integer',
         'is_deleted_server' => 'boolean',
+        'is_deleted_local' => 'boolean',
+        'is_local_change' => 'boolean',
         'last_synced_at' => 'datetime',
         'last_push_at' => 'datetime',
     ];
@@ -111,7 +127,7 @@ class DosenPengajarKelasKuliah extends Model
     }
 
     /**
-     * Dosen alias (pusat) yang ID registrasi-nya dipakai saat push ke server.
+     * Dosen alias (Pusat) yang ID registrasi-nya dipakai saat push ke server.
      * Null jika dosen utama sudah terdaftar di server.
      */
     public function dosenAlias(): BelongsTo
@@ -119,11 +135,19 @@ class DosenPengajarKelasKuliah extends Model
         return $this->belongsTo(Dosen::class, 'id_dosen_alias');
     }
 
+    /**
+     * Dosen alias (Lokal) yang dipilih secara manual via Select2.
+     */
+    public function dosenAliasLokal(): BelongsTo
+    {
+        return $this->belongsTo(Dosen::class, 'id_dosen_alias_lokal');
+    }
+
     // ─── Helper Methods ─────────────────────────────────────
 
     /**
      * Mendapatkan id_registrasi_dosen yang dipakai untuk push ke server.
-     * Prioritas: alias → dosen utama.
+     * Prioritas: alias pusat → dosen utama.
      */
     public function getRegistrasiDosenForPush(): ?string
     {
@@ -132,9 +156,10 @@ class DosenPengajarKelasKuliah extends Model
 
     /**
      * Apakah record ini menggunakan dosen alias?
+     * Cek alias pusat maupun alias lokal.
      */
     public function isUsingAlias(): bool
     {
-        return !is_null($this->id_dosen_alias);
+        return !is_null($this->id_dosen_alias) || !is_null($this->id_dosen_alias_lokal) || !is_null($this->dosen_alias);
     }
 }

@@ -35,7 +35,7 @@ class KelasKuliahController extends Controller
             }
 
             // 2. Search
-            if ($request->has('search') && ! empty($request->input('search')['value'])) {
+            if ($request->has('search') && !empty($request->input('search')['value'])) {
                 $searchValue = $request->input('search')['value'];
                 $query->where(function ($q) use ($searchValue) {
                     $q->where('nama_kelas_kuliah', 'like', "%{$searchValue}%")
@@ -86,12 +86,12 @@ class KelasKuliahController extends Controller
             $formattedData = $data->map(function ($row, $index) use ($start) {
                 // Action Button
                 $btn = '<div class="d-flex gap-1">';
-                $btn .= '<a href="'.route('admin.kelas-kuliah.show', $row->id).'" class="btn btn-icon btn-sm btn-info rounded-pill" title="Detail"><i class="ri-eye-line"></i></a>';
+                $btn .= '<a href="' . route('admin.kelas-kuliah.show', $row->id) . '" class="btn btn-icon btn-sm btn-info rounded-pill" title="Detail"><i class="ri-eye-line"></i></a>';
                 if ($row->sumber_data == 'lokal') {
-                    $btn .= '<a href="'.route('admin.kelas-kuliah.edit', $row->id).'" class="btn btn-icon btn-sm btn-warning rounded-pill" title="Edit"><i class="ri-pencil-line"></i></a>';
-                    $btn .= '<form action="'.route('admin.kelas-kuliah.destroy', $row->id).'" method="POST" class="d-inline delete-form">
-                                '.csrf_field().'
-                                '.method_field('DELETE').'
+                    $btn .= '<a href="' . route('admin.kelas-kuliah.edit', $row->id) . '" class="btn btn-icon btn-sm btn-warning rounded-pill" title="Edit"><i class="ri-pencil-line"></i></a>';
+                    $btn .= '<form action="' . route('admin.kelas-kuliah.destroy', $row->id) . '" method="POST" class="d-inline delete-form">
+                                ' . csrf_field() . '
+                                ' . method_field('DELETE') . '
                                 <button type="button" class="btn btn-icon btn-sm btn-danger rounded-pill btn-delete" title="Hapus"><i class="ri-delete-bin-line"></i></button>
                              </form>';
                 }
@@ -123,7 +123,7 @@ class KelasKuliahController extends Controller
                             break;
                     }
                 }
-                $statusBadge = '<span class="badge '.$statusClass.' rounded-pill">'.$statusText.'</span>';
+                $statusBadge = '<span class="badge ' . $statusClass . ' rounded-pill">' . $statusText . '</span>';
 
                 // Dosen
                 $dosenNames = '-';
@@ -140,7 +140,7 @@ class KelasKuliahController extends Controller
                     'status' => $statusBadge,
                     'DT_RowIndex' => $start + $index + 1,
                     'semester_nama' => $row->semester ? $row->semester->nama_semester : '-',
-                    'kode_mk' => $row->mataKuliah ? '<span class="fw-semibold text-primary">'.$row->mataKuliah->kode_mk.'</span>' : '-',
+                    'kode_mk' => $row->mataKuliah ? '<span class="fw-semibold text-primary">' . $row->mataKuliah->kode_mk . '</span>' : '-',
                     'nama_mk' => $row->mataKuliah ? $row->mataKuliah->nama_mk : '-',
                     'nama_kelas_kuliah' => $row->nama_kelas_kuliah,
                     'bobot_sks' => $row->sks_mk,
@@ -164,7 +164,7 @@ class KelasKuliahController extends Controller
             ->first();
 
         // Fallback if no active semester found
-        if (! $activeSemester) {
+        if (!$activeSemester) {
             $activeSemester = Semester::orderBy('id_semester', 'desc')->first();
         }
 
@@ -192,7 +192,7 @@ class KelasKuliahController extends Controller
             $data['is_deleted_server'] = false;
 
             // Default PDITT flag if not provided (Feeder expects 0/1)
-            if (! array_key_exists('apa_untuk_pditt', $data) || $data['apa_untuk_pditt'] === null) {
+            if (!array_key_exists('apa_untuk_pditt', $data) || $data['apa_untuk_pditt'] === null) {
                 $data['apa_untuk_pditt'] = 0;
             }
 
@@ -226,13 +226,14 @@ class KelasKuliahController extends Controller
             'programStudi',
             'semester',
             'mataKuliah',
-            'kelasDosen.dosen',
+            'dosenPengajar.dosen',
+            'dosenPengajar.dosenAliasLokal',
         ]);
 
         $tahunAjaranId = $kelasKuliah->semester?->id_tahun_ajaran;
 
         $daftarDosenQuery = Dosen::query();
-        if (! empty($tahunAjaranId)) {
+        if (!empty($tahunAjaranId)) {
             $daftarDosenQuery->whereHas('penugasans', function ($query) use ($tahunAjaranId) {
                 $query->where('id_tahun_ajaran', $tahunAjaranId);
             });
@@ -247,6 +248,10 @@ class KelasKuliahController extends Controller
                 ->orderBy('nama')
                 ->get();
         }
+
+        $daftarDosenLokal = Dosen::lokal()
+            ->orderBy('nama')
+            ->get();
 
         $jenisEvaluasiOptions = [
             '1' => 'Evaluasi Akademik',
@@ -257,7 +262,7 @@ class KelasKuliahController extends Controller
 
         $isEditMode = false;
 
-        return view('kelas-kuliah.show', compact('kelasKuliah', 'isEditMode', 'daftarDosen', 'jenisEvaluasiOptions'));
+        return view('kelas-kuliah.show', compact('kelasKuliah', 'isEditMode', 'daftarDosen', 'daftarDosenLokal', 'jenisEvaluasiOptions'));
     }
 
     /**
@@ -267,23 +272,25 @@ class KelasKuliahController extends Controller
      */
     public function edit(KelasKuliah $kelasKuliah)
     {
-        if ($kelasKuliah->sumber_data !== 'lokal') {
-            return redirect()
-                ->route('admin.kelas-kuliah.show', $kelasKuliah->id)
-                ->with('error', 'Data Kelas Kuliah dari server tidak dapat diubah.');
-        }
+        // Allowed to edit both local and server data locally
+        // Server data will be marked as updated_local
 
         $kelasKuliah->load([
             'programStudi',
             'semester',
             'mataKuliah',
-            'kelasDosen.dosen',
+            'dosenPengajar.dosen',
+            'dosenPengajar.dosenAliasLokal',
         ]);
+
+        $prodis = ProgramStudi::orderBy('nama_program_studi')->get();
+        $semesters = Semester::orderBy('id_semester', 'desc')->take(20)->get();
+        $mataKuliahs = MataKuliah::orderBy('nama_mk')->get();
 
         $tahunAjaranId = $kelasKuliah->semester?->id_tahun_ajaran;
 
         $daftarDosenQuery = Dosen::query();
-        if (! empty($tahunAjaranId)) {
+        if (!empty($tahunAjaranId)) {
             $daftarDosenQuery->whereHas('penugasans', function ($query) use ($tahunAjaranId) {
                 $query->where('id_tahun_ajaran', $tahunAjaranId);
             });
@@ -299,6 +306,10 @@ class KelasKuliahController extends Controller
                 ->get();
         }
 
+        $daftarDosenLokal = Dosen::lokal()
+            ->orderBy('nama')
+            ->get();
+
         $jenisEvaluasiOptions = [
             '1' => 'Evaluasi Akademik',
             '2' => 'Aktivitas Partisipatif',
@@ -308,7 +319,16 @@ class KelasKuliahController extends Controller
 
         $isEditMode = true;
 
-        return view('kelas-kuliah.edit', compact('kelasKuliah', 'isEditMode', 'daftarDosen', 'jenisEvaluasiOptions'));
+        return view('kelas-kuliah.edit', compact(
+            'kelasKuliah',
+            'isEditMode',
+            'daftarDosen',
+            'daftarDosenLokal',
+            'jenisEvaluasiOptions',
+            'prodis',
+            'semesters',
+            'mataKuliahs'
+        ));
     }
 
     /**
@@ -320,11 +340,7 @@ class KelasKuliahController extends Controller
      */
     public function update(UpdateKelasKuliahRequest $request, KelasKuliah $kelasKuliah)
     {
-        if ($kelasKuliah->sumber_data !== 'lokal') {
-            return redirect()
-                ->route('admin.kelas-kuliah.show', $kelasKuliah->id)
-                ->with('error', 'Data Kelas Kuliah dari server tidak dapat diubah.');
-        }
+        // Allowed to update locally
 
         $data = $request->validated();
 
@@ -342,10 +358,12 @@ class KelasKuliahController extends Controller
         }
 
         // Monitoring sync: tandai sebagai update lokal (dirty) jika sebelumnya sudah pernah tersinkronisasi
-        if (in_array($kelasKuliah->status_sinkronisasi, [
-            KelasKuliah::STATUS_SYNCED,
-            KelasKuliah::STATUS_PUSH_SUCCESS,
-        ], true)) {
+        if (
+            in_array($kelasKuliah->status_sinkronisasi, [
+                KelasKuliah::STATUS_SYNCED,
+                KelasKuliah::STATUS_PUSH_SUCCESS,
+            ], true)
+        ) {
             $data['status_sinkronisasi'] = KelasKuliah::STATUS_UPDATED_LOCAL;
         }
 
@@ -379,7 +397,7 @@ class KelasKuliahController extends Controller
                 KelasKuliah::STATUS_PUSH_SUCCESS,
             ], true);
 
-        if (! $hasEverSynced) {
+        if (!$hasEverSynced) {
             // Hard delete untuk data lokal yang belum pernah tersinkronisasi
             $kelasKuliah->delete();
         } else {

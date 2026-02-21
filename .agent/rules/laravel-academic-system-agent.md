@@ -78,18 +78,85 @@ Push ke server **ditunda jika production**.
 
 ## 🧱 5. RULES CRUD DATA PUSAT vs LOKAL
 
-1. Data dari server:
+### 1️⃣ Data dari Server (hasil pull)
 
-   * Tidak boleh diupdate.
-   * Tidak boleh dihapus.
-   * Hanya view.
+✔ Boleh diupdate di sistem lokal
+✔ Boleh dihapus di sistem lokal
+✖ Tidak boleh langsung mengubah data server secara real-time
 
-2. Data lokal:
+Setiap perubahan harus:
 
-   * Boleh CRUD.
-   * Saat sync → bisa dialiaskan ke external_id.
+* Ditandai sebagai perubahan lokal
+* Dicatat pada kolom monitoring sinkronisasi
+* Diproses melalui mekanisme push terkontrol (manual/queue)
 
-3. Validasi selalu dilakukan di Controller, bukan hanya UI.
+---
+
+### 2️⃣ Aturan Update Data Server
+
+Jika data `sumber_data = server` lalu diubah di lokal:
+
+```php
+status_sinkronisasi = 'updated_local'
+sync_action = 'update'
+is_local_change = true
+```
+
+Data tetap tampil di sistem, namun masuk daftar pending push.
+
+---
+
+### 3️⃣ Aturan Delete Data Server
+
+Jika data `sumber_data = server` lalu dihapus di lokal:
+
+```php
+status_sinkronisasi = 'deleted_local'
+sync_action = 'delete'
+is_deleted_local = true
+```
+
+* Jangan langsung hapus record.
+* Gunakan soft delete berbasis flag.
+* Data masuk daftar pending push.
+
+---
+
+### 4️⃣ Push ke Server
+
+Push dilakukan melalui:
+
+* Command manual
+* Scheduled job
+* Queue worker
+
+Setelah push berhasil:
+
+```php
+status_sinkronisasi = 'synced'
+is_local_change = false
+last_push_at = now()
+```
+
+Jika gagal:
+
+```php
+status_sinkronisasi = 'push_failed'
+error_message = '...'
+```
+
+---
+
+### 5️⃣ Data Lokal (created_local)
+
+Data yang dibuat lokal tetap:
+
+```php
+status_sinkronisasi = 'created_local'
+sync_action = 'insert'
+```
+
+Dan dipush ketika sinkronisasi dijalankan.
 
 ---
 
