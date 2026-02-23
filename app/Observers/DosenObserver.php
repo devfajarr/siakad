@@ -22,14 +22,18 @@ class DosenObserver
         $email = $dosen->email ?? ($loginId . '@polsa.ac.id');
 
         // 2. Automate User creation
-        $user = User::firstOrCreate(
-            ['email' => $email],
-            [
+        $user = User::where('username', $loginId)
+            ->orWhere('email', $email)
+            ->first();
+
+        if (!$user) {
+            $user = User::create([
                 'name' => $dosen->nama,
                 'username' => $loginId,
+                'email' => $email,
                 'password' => Hash::make($loginId), // Default password is NIDN or NIP
-            ]
-        );
+            ]);
+        }
 
         // 3. Bind the user to the Dosen profile quietly
         $dosen->updateQuietly(['user_id' => $user->id]);

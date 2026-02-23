@@ -42,6 +42,42 @@ class MahasiswaController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function generateUser(Mahasiswa $mahasiswa, \App\Services\MahasiswaAccountGenerationService $service)
+    {
+        try {
+            $user = $service->generate($mahasiswa);
+            if (!$user) {
+                return back()->with('error', 'Mahasiswa ini sudah memiliki akun pengguna.');
+            }
+            return back()->with('success', 'Akun pengguna berhasil dibuat untuk mahasiswa: ' . $mahasiswa->nama_mahasiswa);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal membuat akun: ' . $e->getMessage());
+        }
+    }
+
+    public function bulkGenerateUsers(Request $request, \App\Services\MahasiswaAccountGenerationService $service)
+    {
+        $request->validate([
+            'mahasiswa_ids' => 'required|array',
+            'mahasiswa_ids.*' => 'exists:mahasiswas,id'
+        ]);
+
+        $mahasiswas = Mahasiswa::whereIn('id', $request->mahasiswa_ids)->whereNull('user_id')->get();
+
+        $count = 0;
+        foreach ($mahasiswas as $mahasiswa) {
+            try {
+                if ($service->generate($mahasiswa)) {
+                    $count++;
+                }
+            } catch (\Exception $e) {
+                // Ignore specific errors to let others finish processing
+            }
+        }
+
+        return back()->with('success', "Berhasil membuat {$count} akun pengguna mahasiswa secara massal.");
+    }
+
     public function index(Request $request)
     {
         $query = Mahasiswa::with(['riwayatAktif.prodi', 'riwayatAktif.semester', 'agama'])
@@ -267,6 +303,14 @@ class MahasiswaController extends Controller
         }
 
         return view('admin.mahasiswa.show', compact('mahasiswa', 'activeSemester', 'pesertaKelasKuliah', 'totalSks', 'riwayatPendidikan', 'daftarKelas'));
+    }
+
+    public function akun(string $id)
+    {
+        $mahasiswa = Mahasiswa::with('user')->findOrFail($id);
+        $roles = \Spatie\Permission\Models\Role::orderBy('name')->get();
+
+        return view('admin.mahasiswa.show', compact('mahasiswa', 'roles'));
     }
 
     /**

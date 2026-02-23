@@ -21,6 +21,9 @@
             <table class="datatables-basic table table-bordered table-hover text-nowrap">
                 <thead class="table-light">
                     <tr>
+                        <th width="30px">
+                            <input type="checkbox" class="form-check-input" id="checkAll">
+                        </th>
                         <th width="100px">Action</th>
                         <th width="120px">Status</th>
                         <th width="50px">No</th>
@@ -38,6 +41,11 @@
                     @foreach ($mahasiswa as $index => $item)
                         <tr>
                             <td>
+                                @if (is_null($item->user_id))
+                                    <input type="checkbox" class="form-check-input mahasiswa-checkbox" name="mahasiswa_ids[]" value="{{ $item->id }}">
+                                @endif
+                            </td>
+                            <td>
                                 <div class="d-flex gap-2">
                                     <a href="{{ route('admin.mahasiswa.show', $item->id) }}" class="btn btn-icon btn-sm btn-info rounded-pill" title="Detail">
                                         <i class="ri-search-line"></i>
@@ -52,6 +60,14 @@
                                             <i class="ri-delete-bin-line"></i>
                                         </button>
                                     </form>
+                                    @if(is_null($item->user_id) && !empty($item->riwayatAktif->nim))
+                                        <form action="{{ route('admin.mahasiswa.generate-user', $item->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-icon btn-sm btn-success rounded-pill" title="Generate Akun Login">
+                                                <i class="ri-user-add-line"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                             <td>
@@ -213,6 +229,45 @@
                             ]
                         },
                         {
+                            text: '<i class="ri-user-add-line ri-16px me-sm-1"></i> <span class="d-none d-sm-inline-block">Buat Akun Kolektif</span>',
+                            className: 'btn btn-success waves-effect waves-light me-2',
+                            action: function (e, dt, node, config) {
+                                let selectedIds = [];
+                                $('.mahasiswa-checkbox:checked').each(function () {
+                                    selectedIds.push($(this).val());
+                                });
+
+                                if (selectedIds.length === 0) {
+                                    alert('Silakan pilih minimal satu mahasiswa untuk dibuatkan akun.');
+                                    return;
+                                }
+
+                                if (confirm(`Apakah Anda yakin ingin membuat akun secara massal untuk ${selectedIds.length} mahasiswa terpilih?`)) {
+                                    let form = $('<form>', {
+                                        'method': 'POST',
+                                        'action': '{{ route("admin.mahasiswa.bulk-generate-users") }}'
+                                    });
+
+                                    form.append($('<input>', {
+                                        'type': 'hidden',
+                                        'name': '_token',
+                                        'value': '{{ csrf_token() }}'
+                                    }));
+
+                                    selectedIds.forEach(function (id) {
+                                        form.append($('<input>', {
+                                            'type': 'hidden',
+                                            'name': 'mahasiswa_ids[]',
+                                            'value': id
+                                        }));
+                                    });
+
+                                    $(document.body).append(form);
+                                    form.submit();
+                                }
+                            }
+                        },
+                        {
                             text: '<i class="ri-add-line ri-16px me-sm-1"></i> <span class="d-none d-sm-inline-block">Tambah Mahasiswa</span>',
                             className: 'create-new btn btn-primary waves-effect waves-light',
                             action: function (e, dt, node, config) {
@@ -223,6 +278,30 @@
                     responsive: false,
                     scrollX: true
                 });
+
+                // Handle select all checkbox
+                $('#checkAll').on('change', function () {
+                    var isChecked = $(this).prop('checked');
+                    $('.mahasiswa-checkbox').prop('checked', isChecked);
+                });
+
+                // Update select all checkbox state when individual checkboxes change
+                $('.datatables-basic').on('change', '.mahasiswa-checkbox', function () {
+                    var totalCheckboxes = $('.mahasiswa-checkbox').length;
+                    var checkedCheckboxes = $('.mahasiswa-checkbox:checked').length;
+                    
+                    if (totalCheckboxes === checkedCheckboxes) {
+                        $('#checkAll').prop('checked', true);
+                        $('#checkAll').prop('indeterminate', false);
+                    } else if (checkedCheckboxes > 0) {
+                        $('#checkAll').prop('checked', false);
+                        $('#checkAll').prop('indeterminate', true);
+                    } else {
+                        $('#checkAll').prop('checked', false);
+                        $('#checkAll').prop('indeterminate', false);
+                    }
+                });
+
                 let filterBadge = '';
                 @if(request()->filled('periode_masuk') || request()->filled('prodi'))
                     filterBadge = '<span class="badge bg-primary ms-2 fs-6"><i class="ri-filter-fill"></i> Data Difilter</span>';

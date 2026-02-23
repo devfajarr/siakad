@@ -23,6 +23,12 @@
                         KRS MAHASISWA
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.mahasiswa.akun', $mahasiswa->id) }}"
+                        class="nav-link {{ request()->routeIs('admin.mahasiswa.akun') ? 'active' : '' }}" role="tab">
+                        AKUN & KEAMANAN
+                    </a>
+                </li>
             </ul>
         </div>
     </div>

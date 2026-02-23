@@ -2,222 +2,168 @@
 trigger: always_on
 ---
 
-## 🔒 1. RULES ARSITEKTUR & STRUKTUR
+LARAVEL ACADEMIC SYNC SYSTEM
 
-1. Gunakan struktur project dan template yang sudah tersedia.
-2. Jangan mengubah layout global (sidebar, header, footer).
-3. Gunakan clean architecture (Model → Service → Command jika perlu).
-4. Ikuti standar penamaan Laravel:
+Daftar aturan ini wajib dipatuhi dalam setiap interaksi pembuatan kode, analisis, dan modifikasi proyek secara berurutan.
 
-   * snake_case untuk tabel
-   * PascalCase untuk model
-   * camelCase untuk method
-5. Gunakan foreign key constraint dan indexing.
-6. Jangan hardcode data jika berasal dari database.
-7. Gunakan partial blade untuk form/modal agar reusable.
+1. RULES ANALISIS SEBELUM IMPLEMENTASI
 
----
+Sebelum membuat migration, model, sinkronisasi, atau CRUD, wajib melakukan:
 
-## 🛡 2. RULES SECURITY
+Analisis endpoint API dan GetDictionary.
 
-1. Jangan pernah melakukan push ke server jika server dalam mode production.
-2. Semua input harus menggunakan FormRequest.
-3. Jangan hanya disable tombol di UI — validasi juga di Controller.
-4. Gunakan CSRF protection.
-5. Gunakan mass-assignment protection (`$fillable`).
-6. Gunakan policy/authorization check jika diperlukan.
-7. Jangan expose external_id tanpa alasan jelas.
+Identifikasi primary key global.
 
----
+Identifikasi potensi konflik data.
 
-## ⚡ 3. RULES PERFORMANCE
+Tentukan strategi monitoring status.
 
-1. Saat pull data dari server:
+2. RULES ARSITEKTUR DAN STRUKTUR
 
-   * Gunakan pagination jika tersedia.
-   * Hindari load semua data sekaligus jika besar.
-2. Gunakan `updateOrCreate()` untuk sinkronisasi.
-3. Gunakan indexing pada:
+Gunakan struktur project dan template yang sudah tersedia.
 
-   * external_id
-   * kode unik
-   * status_sinkronisasi
-4. Gunakan logging saat sinkronisasi.
-5. Hindari N+1 query (gunakan eager loading).
+Jangan mengubah layout global (sidebar, header, footer).
 
----
+Gunakan clean architecture (Model -> Service -> Command jika perlu).
 
-## 🔄 4. RULES SINKRONISASI DATA (WAJIB KONSISTEN)
+Ikuti standar penamaan Laravel:
 
-Semua tabel yang sinkron dengan server harus memiliki:
+snake_case untuk tabel.
 
-* external_id (nullable)
-* sumber_data ('server' / 'lokal')
-* status_sinkronisasi:
+PascalCase untuk model.
 
-  * synced
-  * created_local
-  * updated_local
-  * deleted_local
-  * pending_push
-* is_deleted_server (boolean)
-* last_synced_at (timestamp nullable)
+camelCase untuk method.
 
-Logika standar:
+Gunakan foreign key constraint dan indexing.
 
-| Kondisi           | sumber_data | status_sinkronisasi      |
-| ----------------- | ----------- | ------------------------ |
-| Tarik dari server | server      | synced                   |
-| Buat lokal        | lokal       | created_local            |
-| Update lokal      | lokal       | updated_local            |
-| Hapus di server   | server      | is_deleted_server = true |
+Jangan hardcode data jika berasal dari database.
 
-Push ke server **ditunda jika production**.
+Gunakan partial blade untuk form/modal agar reusable.
 
----
+3. RULES KEAMANAN (SECURITY)
 
-## 🧱 5. RULES CRUD DATA PUSAT vs LOKAL
+Jangan pernah melakukan push ke server jika server dalam mode production.
 
-### 1️⃣ Data dari Server (hasil pull)
+Semua input harus menggunakan FormRequest.
 
-✔ Boleh diupdate di sistem lokal
-✔ Boleh dihapus di sistem lokal
-✖ Tidak boleh langsung mengubah data server secara real-time
+Jangan hanya disable tombol di UI — validasi juga di Controller.
 
-Setiap perubahan harus:
+Gunakan CSRF protection.
 
-* Ditandai sebagai perubahan lokal
-* Dicatat pada kolom monitoring sinkronisasi
-* Diproses melalui mekanisme push terkontrol (manual/queue)
+Gunakan mass-assignment protection ($fillable).
 
----
+Gunakan policy/authorization check jika diperlukan.
 
-### 2️⃣ Aturan Update Data Server
+Jangan expose external_id ke user interface tanpa alasan jelas.
 
-Jika data `sumber_data = server` lalu diubah di lokal:
+4. RULES PERFORMA
 
-```php
-status_sinkronisasi = 'updated_local'
-sync_action = 'update'
-is_local_change = true
-```
+Saat pull data dari server:
 
-Data tetap tampil di sistem, namun masuk daftar pending push.
+Gunakan pagination jika tersedia.
 
----
+Hindari load semua data sekaligus jika kapasitas besar.
 
-### 3️⃣ Aturan Delete Data Server
+Gunakan updateOrCreate() untuk sinkronisasi.
 
-Jika data `sumber_data = server` lalu dihapus di lokal:
+Gunakan indexing pada: external_id, kode_unik, status_sinkronisasi.
 
-```php
-status_sinkronisasi = 'deleted_local'
-sync_action = 'delete'
-is_deleted_local = true
-```
+Gunakan logging saat sinkronisasi (Lihat poin 7).
 
-* Jangan langsung hapus record.
-* Gunakan soft delete berbasis flag.
-* Data masuk daftar pending push.
+Hindari N+1 query (gunakan eager loading with()).
 
----
+5. RULES SINKRONISASI DATA (WAJIB KONSISTEN)
 
-### 4️⃣ Push ke Server
+Semua tabel yang sinkron dengan server harus memiliki kolom:
 
-Push dilakukan melalui:
+external_id (nullable)
 
-* Command manual
-* Scheduled job
-* Queue worker
+sumber_data ('server' / 'lokal')
 
-Setelah push berhasil:
+status_sinkronisasi ('synced', 'created_local', 'updated_local', 'deleted_local', 'pending_push', 'push_failed')
 
-```php
-status_sinkronisasi = 'synced'
-is_local_change = false
-last_push_at = now()
-```
+is_deleted_server (boolean)
 
-Jika gagal:
+last_synced_at (timestamp nullable)
 
-```php
-status_sinkronisasi = 'push_failed'
-error_message = '...'
-```
+6. RULES CRUD DATA PUSAT VS LOKAL
 
----
+Data dari Server (PULL):
 
-### 5️⃣ Data Lokal (created_local)
+Boleh diupdate/dihapus di lokal, tapi jangan ubah data server secara real-time.
 
-Data yang dibuat lokal tetap:
+Perubahan ditandai dengan status_sinkronisasi = 'updated_local'.
 
-```php
-status_sinkronisasi = 'created_local'
-sync_action = 'insert'
-```
+Penghapusan ditandai dengan status_sinkronisasi = 'deleted_local' (Soft Delete).
 
-Dan dipush ketika sinkronisasi dijalankan.
+Push ke Server:
 
----
+Dilakukan melalui Command/Job.
 
-## 🧩 6. RULES UI & TEMPLATE
+Jika berhasil: status_sinkronisasi = 'synced', last_push_at = now().
 
-1. Gunakan template yang sudah tersedia.
-2. Jangan membuat desain baru jika tidak diminta.
-3. Gunakan DataTables untuk tabel besar.
-4. Gunakan modal reusable untuk create/edit.
-5. Tambahkan pembeda visual untuk:
+Jika gagal: status_sinkronisasi = 'push_failed', isi error_message.
 
-   * Data pusat vs lokal
-   * Status aktif vs tidak aktif
-6. Hindari elemen terlalu rounded (professional look).
-7. Gunakan konsistensi spacing & shadow ringan.
+7. RULES LOGGING DAN MONITORING
 
----
+Setiap aksi wajib dicatat ke dalam storage/logs/laravel.log menggunakan facade Log. Format pesan: [KATEGORI] - [PESAN] - [CONTEXT].
 
-## 🧠 7. RULES ANALISIS SEBELUM IMPLEMENTASI
+Logging CRUD:
 
-Sebelum membuat:
+CREATE: Log::info("CRUD_CREATE: [Model] berhasil dibuat", ['id' => $id, 'data' => $payload]);
 
-* Migration
-* Model
-* Sinkronisasi
-* CRUD
+UPDATE: Log::info("CRUD_UPDATE: [Model] diubah", ['id' => $id, 'changes' => $changes]);
 
-WAJIB melakukan:
+DELETE: Log::warning("CRUD_DELETE: [Model] dihapus/soft-delete", ['id' => $id]);
 
-1. Analisis endpoint API.
-2. Analisis GetDictionary.
-3. Identifikasi primary key global.
-4. Identifikasi potensi konflik data.
-5. Tentukan strategi monitoring status.
+Logging Sinkronisasi (SYNC):
 
-Jangan langsung membuat migration tanpa analisis.
+PULL: Log::info("SYNC_PULL: Mulai tarik data [Table]", ['endpoint' => $url]);
 
----
+PUSH: Log::info("SYNC_PUSH: Mengirim data [Table] ke server", ['count' => $count, 'ids' => $ids]);
 
-## 📦 8. RULES OUTPUT AI AGENT
+SYNC_SUCCESS: Log::info("SYNC_SUCCESS: Sinkronisasi [Table] selesai");
+
+Logging Error dan System:
+
+Semua blok catch wajib mencatat error menggunakan Log::error("SYSTEM_ERROR: [Pesan Deskriptif]", ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
+8. RULES UI DAN TEMPLATE
+
+Gunakan DataTables untuk tabel besar.
+
+Gunakan modal reusable untuk create/edit.
+
+Tambahkan pembeda visual (badge/warna) untuk data Pusat vs Lokal.
+
+Hindari elemen terlalu rounded (professional look).
+
+Gunakan konsistensi spacing dan shadow ringan.
+
+9. RULES OUTPUT AI AGENT
 
 Jawaban harus selalu dalam struktur:
 
-1. Analisis
-2. Desain Arsitektur
-3. Struktur Tabel
-4. Model
-5. Migration
-6. Command (jika sinkronisasi)
-7. Penjelasan Monitoring Status
+Analisis (Termasuk titik logging yang akan dipasang).
 
-Gunakan bahasa profesional namun ramah pemula.
+Desain Arsitektur.
 
----
+Struktur Tabel / Migration.
 
-## 🚫 9. YANG TIDAK BOLEH DILAKUKAN
+Model (Lengkap dengan $fillable).
 
-* Push ke server production.
-* Menghapus data server secara langsung.
-* Mengubah struktur template global.
-* Hardcode status tanpa enum/constant.
-* Melewatkan validasi.
+Logic (Service/Controller/Command) — Wajib mencantumkan implementasi Log::.
 
----
+Penjelasan Monitoring Status.
+
+10. LARANGAN
+
+Push ke server production.
+
+Menghapus data server secara langsung.
+
+Mengubah struktur template global.
+
+Hardcode status tanpa enum/constant.
+
+Melewatkan validasi atau try-catch logging.

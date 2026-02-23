@@ -118,6 +118,11 @@ class DosenPengajarKelasController extends Controller
                 ]);
             });
         } catch (Throwable $exception) {
+            \Illuminate\Support\Facades\Log::error('Gagal menghapus dosen pengajar: ' . $exception->getMessage(), [
+                'exception' => $exception,
+                'dosen_pengajar_id' => $dosenPengajar->id ?? null
+            ]);
+
             return redirect()
                 ->back()
                 ->with('error', 'Gagal menghapus dosen pengajar: ' . $exception->getMessage());

@@ -164,10 +164,28 @@ class KelasKuliah extends Model
     }
 
     /**
+     * Alias method untuk Dosen Pengajar.
+     */
+    public function dosenPengajars(): HasMany
+    {
+        return $this->dosenPengajar();
+    }
+
+    /**
      * Relasi ke Peserta Kelas Kuliah (KRS).
      */
     public function pesertaKelasKuliah(): HasMany
     {
         return $this->hasMany(PesertaKelasKuliah::class, 'id_kelas_kuliah', 'id_kelas_kuliah');
+    }
+
+    /**
+     * Relasi ke Penjadwalan Waktu dan Ruang.
+     */
+    public function jadwalKuliahs(): HasMany
+    {
+        // Parameter kedua disesuaikan agar nyambung meskipun ID lokal KelasKuliah adalah 'id' auto-increment
+        // Foreign id default di jadwal_kuliahs adalah kelas_kuliah_id.
+        return $this->hasMany(JadwalKuliah::class, 'kelas_kuliah_id');
     }
 }

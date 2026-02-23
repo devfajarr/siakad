@@ -104,6 +104,29 @@
                 </a>
             </li>
 
+            <!-- Data Master / Referensi -->
+            <li class="menu-header mt-5 small text-uppercase">
+                <span class="menu-header-text">Data Master</span>
+            </li>
+            <li class="menu-item {{ request()->routeIs('admin.semester.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.semester.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-bookmark-3-line"></i>
+                    <div data-i18n="Master Semester">Master Semester</div>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('admin.jadwal-global.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.jadwal-global.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-calendar-todo-fill"></i>
+                    <div data-i18n="Jadwal Terpadu">Jadwal Terpadu</div>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('admin.ruangan.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.ruangan.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-building-4-line"></i>
+                    <div data-i18n="Master Ruangan">Master Ruangan</div>
+                </a>
+            </li>
+
             <!-- Manajemen Pengguna & Otorisasi -->
             <li class="menu-header mt-5 small text-uppercase">
                 <span class="menu-header-text">Akses & Keamanan</span>
@@ -122,8 +145,13 @@
             </li>
         @else
             <!-- Dashboard Default System (Hanya untuk non-admin) -->
-            <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <a href="{{ url('/dashboard') }}" class="menu-link">
+            <li
+                class="menu-item {{ request()->routeIs(['dashboard', 'dosen.dashboard', 'mahasiswa.dashboard']) ? 'active' : '' }}">
+                @php
+                    $dashboardRoute = auth()->user()->hasRole('Dosen') ? route('dosen.dashboard') :
+                        (auth()->user()->hasRole('Mahasiswa') ? route('mahasiswa.dashboard') : url('/dashboard'));
+                @endphp
+                <a href="{{ $dashboardRoute }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-home-smile-line"></i>
                     <div data-i18n="Dashboard Utama">Dashboard Utama</div>
                 </a>
@@ -150,6 +178,12 @@
         @elseif(session('active_role') == 'Dosen')
             <li class="menu-header mt-5 small text-uppercase">
                 <span class="menu-header-text">Ruang Dosen</span>
+            </li>
+            <li class="menu-item {{ request()->routeIs('dosen.kelas.*') ? 'active' : '' }}">
+                <a href="{{ route('dosen.kelas.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-artboard-line"></i>
+                    <div data-i18n="Daftar Kelas Saya">Daftar Kelas Saya</div>
+                </a>
             </li>
             <li class="menu-item">
                 <a href="#" class="menu-link">

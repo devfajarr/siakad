@@ -246,6 +246,7 @@ class KelasKuliahController extends Controller
             'dosenPengajar.dosenAliasLokal',
             'pesertaKelasKuliah.riwayatPendidikan.mahasiswa',
             'pesertaKelasKuliah.riwayatPendidikan.programStudi',
+            'jadwalKuliahs.ruang',
         ]);
 
         $tahunAjaranId = $kelasKuliah->semester?->id_tahun_ajaran;
@@ -288,6 +289,9 @@ class KelasKuliahController extends Controller
             '4' => 'Kognitif / Pengetahuan',
         ];
 
+        // ─── AMBIL DATA RUANG UNTUK MODAL PENJADWALAN ───────────────────────
+        $daftarRuang = \App\Models\Ruang::orderBy('nama_ruang')->get();
+
         $isEditMode = false;
 
         return view('admin.kelas-kuliah.show', compact(
@@ -296,7 +300,8 @@ class KelasKuliahController extends Controller
             'daftarDosen',
             'daftarDosenLokal',
             'jenisEvaluasiOptions',
-            'daftarMahasiswa'
+            'daftarMahasiswa',
+            'daftarRuang'
         ));
     }
 

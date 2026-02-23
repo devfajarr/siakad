@@ -359,6 +359,13 @@
                     <i class="ri-group-line me-1"></i> Mahasiswa KRS / Peserta Kelas
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-medium" id="tab-jadwal-ruangan" data-bs-toggle="tab"
+                    data-bs-target="#tab-pane-jadwal-ruangan" type="button" role="tab"
+                    aria-controls="tab-pane-jadwal-ruangan" aria-selected="false">
+                    <i class="ri-calendar-event-line me-1"></i> Jadwal & Ruangan
+                </button>
+            </li>
         </ul>
     </div>
     <div class="card-body">
@@ -613,8 +620,8 @@
                         <tbody>
                             @forelse ($kelasKuliah->pesertaKelasKuliah as $index => $peserta)
                                 @php
-                                    $mhs = $peserta->riwayatPendidikan->mahasiswa;
-                                    $prodi = $peserta->riwayatPendidikan->programStudi;
+                                    $mhs = $peserta->riwayatPendidikan?->mahasiswa;
+                                    $prodi = $peserta->riwayatPendidikan?->programStudi;
                                 @endphp
                                 <tr class="text-center">
                                     <td>
@@ -678,6 +685,12 @@
                     </table>
                 </div>
             </div>
+
+            {{-- TAB 3: Jadwal & Ruangan --}}
+            <div class="tab-pane fade" id="tab-pane-jadwal-ruangan" role="tabpanel" aria-labelledby="tab-jadwal-ruangan">
+                @include('admin.kelas-kuliah.partials._tab_jadwal')
+            </div>
+
         </div>
     </div>
 </div>
@@ -711,6 +724,13 @@
                 placeholder: 'Cari berdasarkan NIM atau Nama Mahasiswa...',
                 width: '100%',
                 allowClear: true
+            });
+
+            // Initialize Select2 for Ruangan (Modal Jadwal Kuliah)
+            $('.select2-ruangan').select2({
+                dropdownParent: $('#modalJadwal'),
+                placeholder: '-- Cari Ruangan --',
+                width: '100%'
             });
 
             // Specific initialization for Modal Dosen (if present)

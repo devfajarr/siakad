@@ -25,6 +25,10 @@
             <div class="col-12 mb-4">
                 @include('admin.mahasiswa.partials._krs')
             </div>
+        @elseif(request()->routeIs('admin.mahasiswa.akun'))
+            <div class="col-12 mb-4">
+                @include('admin.mahasiswa.partials._akun')
+            </div>
         @endif
 
     </div>

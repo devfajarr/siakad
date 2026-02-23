@@ -35,7 +35,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/mahasiswa/{id}/detail', [MahasiswaController::class, 'detail'])->name('mahasiswa.detail');
     Route::get('/mahasiswa/{id}/histori', [MahasiswaController::class, 'histori'])->name('mahasiswa.histori');
     Route::get('/mahasiswa/{id}/krs', [MahasiswaController::class, 'krs'])->name('mahasiswa.krs');
+    Route::get('/mahasiswa/{id}/akun', [MahasiswaController::class, 'akun'])->name('mahasiswa.akun');
 
+    // Mahasiswa Sync & CRUD
+    Route::post('mahasiswa/generate-user/{mahasiswa}', [MahasiswaController::class, 'generateUser'])->name('mahasiswa.generate-user');
+    Route::post('mahasiswa/bulk-generate-users', [MahasiswaController::class, 'bulkGenerateUsers'])->name('mahasiswa.bulk-generate-users');
     Route::resource('mahasiswa', MahasiswaController::class);
 
     // Riwayat Pendidikan CRUD (store, edit, update, destroy)
@@ -86,7 +90,48 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('kelas-dosen', [DosenPengajarKelasController::class, 'store'])->name('kelas.dosen.store');
-    Route::delete('kelas-dosen/{kelas_dosen}', [DosenPengajarKelasController::class, 'destroy'])->name('kelas.dosen.destroy');
+    Route::delete('kelas-dosen/{dosen_pengajar}', [DosenPengajarKelasController::class, 'destroy'])->name('kelas.dosen.destroy');
+
+    // Route untuk Peserta Kelas Kuliah (KRS)
+    Route::post('peserta-kelas/{kelasKuliah}', [\App\Http\Controllers\PesertaKelasKuliahController::class, 'store'])->name('peserta-kelas.store');
+    Route::delete('peserta-kelas/{pesertaKelasKuliah}', [\App\Http\Controllers\PesertaKelasKuliahController::class, 'destroy'])->name('peserta-kelas.destroy');
+
+    // Route Transaksi Jadwal Kuliah (Pencegahan Double Booking / Double Teaching)
+    Route::post('jadwal-kuliah', [\App\Http\Controllers\JadwalKuliahController::class, 'store'])->name('admin.jadwal-kuliah.store');
+    Route::put('jadwal-kuliah/{id}', [\App\Http\Controllers\JadwalKuliahController::class, 'update'])->name('admin.jadwal-kuliah.update');
+    Route::delete('jadwal-kuliah/{id}', [\App\Http\Controllers\JadwalKuliahController::class, 'destroy'])->name('admin.jadwal-kuliah.destroy');
+
+    // Route Master Ruangan
+    Route::resource('ruangan', \App\Http\Controllers\RuangController::class)->except(['create', 'show', 'edit'])->names([
+        'index' => 'admin.ruangan.index',
+        'store' => 'admin.ruangan.store',
+        'update' => 'admin.ruangan.update',
+        'destroy' => 'admin.ruangan.destroy',
+    ]);
+
+    // Route Manajemen Jadwal Terpadu (Global)
+    Route::get('jadwal-global/kelas-by-semester', [\App\Http\Controllers\JadwalGlobalController::class, 'getKelasBySemester'])->name('admin.jadwal-global.kelas-by-semester');
+    Route::get('jadwal-global', [\App\Http\Controllers\JadwalGlobalController::class, 'index'])->name('admin.jadwal-global.index');
+    Route::post('jadwal-global', [\App\Http\Controllers\JadwalGlobalController::class, 'store'])->name('admin.jadwal-global.store');
+
+    // Master Semester (Routing Aktivasi Global)
+    Route::get('semester', [\App\Http\Controllers\SemesterController::class, 'index'])->name('admin.semester.index');
+    Route::post('semester/set-active/{id}', [\App\Http\Controllers\SemesterController::class, 'setActive'])->name('admin.semester.set-active');
+});
+
+Route::middleware(['auth', 'role:Mahasiswa'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+    Route::get('/dashboard', function () {
+        if (!session()->has('active_role')) {
+            session(['active_role' => 'Mahasiswa']);
+        }
+        return 'Selamat datang di Dashboard Mahasiswa';
+    })->name('dashboard');
+});
+
+Route::middleware(['auth', 'role:Dosen'])->prefix('dosen')->name('dosen.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Dosen\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('kelas', [\App\Http\Controllers\Dosen\DaftarKelasController::class, 'index'])->name('kelas.index');
+    Route::get('kelas/{id}', [\App\Http\Controllers\Dosen\DaftarKelasController::class, 'show'])->name('kelas.show');
 });
 
 require __DIR__ . '/auth.php';

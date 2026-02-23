@@ -56,11 +56,8 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get the owning profileable model.
-     */
-    public function profileable()
+    public function mahasiswa()
     {
-        return $this->morphTo();
+        return $this->hasOne(Mahasiswa::class, 'user_id');
     }
 }

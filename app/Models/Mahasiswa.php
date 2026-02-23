@@ -10,6 +10,11 @@ class Mahasiswa extends Model
     // Allow mass assignment for all except ID (handled by Auto-Increment)
     protected $guarded = ['id'];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
     protected $casts = [
         'tanggal_lahir' => 'date',
         'penerima_kps' => 'boolean',
