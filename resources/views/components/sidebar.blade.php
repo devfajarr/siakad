@@ -197,6 +197,28 @@
                     <div data-i18n="Input Nilai Mahasiswa">Input Nilai Mahasiswa</div>
                 </a>
             </li>
+        @elseif(session('active_role') == 'Mahasiswa')
+            <li class="menu-header mt-5 small text-uppercase">
+                <span class="menu-header-text">Ruang Mahasiswa</span>
+            </li>
+            <li class="menu-item {{ request()->routeIs('mahasiswa.kelas.*') ? 'active' : '' }}">
+                <a href="{{ route('mahasiswa.kelas.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-artboard-line"></i>
+                    <div data-i18n="Daftar Kelas">Daftar Kelas</div>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="menu-icon tf-icons ri-calendar-todo-line"></i>
+                    <div data-i18n="Jadwal Saya">Jadwal Saya</div>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="menu-icon tf-icons ri-file-list-3-line"></i>
+                    <div data-i18n="KRS Online">KRS Online</div>
+                </a>
+            </li>
         @endif
     </ul>
 </aside>

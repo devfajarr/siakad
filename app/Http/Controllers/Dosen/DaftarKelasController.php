@@ -25,8 +25,10 @@ class DaftarKelasController extends Controller
             ->with(['mataKuliah', 'dosenPengajars.dosen', 'jadwalKuliahs.ruangan'])
             ->get();
 
-        // Ambil daftar seluruh semester untuk rekap (Urutkan dari yang terbaru)
-        $semesters = \App\Models\Semester::orderBy('id_semester', 'desc')->get();
+        // Ambil daftar semester (hanya yang sedang berjalan dan yang lampau)
+        $semesters = \App\Models\Semester::where('id_semester', '<=', getActiveSemesterId())
+            ->orderBy('id_semester', 'desc')
+            ->get();
 
         return view('dosen.daftar-kelas.index', compact('kelasKuliahs', 'semesters', 'semesterId'));
     }
