@@ -30,7 +30,8 @@
                         <dt class="col-sm-4 fw-medium text-nowrap">SKS / Kapasitas</dt>
                         <dd class="col-sm-8">
                             {{ rtrim(rtrim(number_format($kelasKuliah->mataKuliah->sks ?? 0, 2), '0'), '.') }} /
-                            {{ $kelasKuliah->kapasitas ?? 0 }}</dd>
+                            {{ $kelasKuliah->kapasitas ?? 0 }}
+                        </dd>
 
                         <dt class="col-sm-4 fw-medium text-nowrap">Team Teaching</dt>
                         <dd class="col-sm-8">
@@ -42,7 +43,7 @@
                                     @endphp
                                     <li class="{{ $isMe ? 'fw-bold text-primary' : '' }}">
                                         <i class="ri-user-{{ $isMe ? 'star' : 'line' }} me-1"></i>
-                                        {{ $pengajar->dosen->nama ?? ($pengajar->dosen_alias ?? '-') }}
+                                        {{ $pengajar->nama_tampilan }}
                                         <br><small class="text-muted ms-4">Peran: {{ $jenisEvaluasi }}</small>
                                     </li>
                                 @endforeach
@@ -59,7 +60,7 @@
                                         {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} -
                                         {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}</span>
                                     <span class="badge bg-label-secondary"><i class="ri-map-pin-line"></i>
-                                        {{ $jadwal->ruangan->nama_ruang ?? 'TBA' }}</span>
+                                        {{ $jadwal->ruang->nama_ruang ?? 'TBA' }}</span>
                                 </div>
                             @empty
                                 <span class="text-muted fst-italic">Jadwal belum ditentukan</span>
@@ -90,8 +91,8 @@
                         <tbody>
                             @foreach ($kelasKuliah->pesertaKelasKuliah as $index => $peserta)
                                 @php
-                                    $mahasiswa = $peserta->mahasiswa;
-                                    $riwayat = $mahasiswa ? $mahasiswa->riwayatAktif : null;
+                                    $riwayat = $peserta->riwayatPendidikan;
+                                    $mahasiswa = $riwayat->mahasiswa ?? null;
                                 @endphp
                                 <tr>
                                     <td>{{ $index + 1 }}</td>

@@ -162,4 +162,58 @@ class DosenPengajarKelasKuliah extends Model
     {
         return !is_null($this->id_dosen_alias) || !is_null($this->id_dosen_alias_lokal) || !is_null($this->dosen_alias);
     }
+
+    /**
+     * Accessor untuk nama tampilan dosen pengajar (menangani alias lokal dan global).
+     */
+    public function getNamaTampilanAttribute(): string
+    {
+        $user = auth()->user();
+        $isAdmin = $user && $user->hasRole('admin');
+
+        // Jika Admin, tampilkan nama asli dari dosen utama
+        if ($isAdmin) {
+            return $this->dosen->nama ?? '-';
+        }
+
+        // 1. Cek Alias Kontekstual (dosen_alias string atau id_dosen_alias_lokal)
+        if (!empty($this->dosen_alias)) {
+            return $this->dosen_alias;
+        }
+
+        if ($this->dosenAliasLokal) {
+            return $this->dosenAliasLokal->nama_tampilan;
+        }
+
+        // 2. Fallback ke Alias Global di model Dosen
+        return $this->dosen->nama_tampilan ?? '-';
+    }
+
+    /**
+     * Accessor untuk nama tampilan dosen khusus di halaman Admin.
+     * Mengikat Nama Asli (dari Dosen utama) dengan Alias Kontekstual (jika ada)
+     * atau Alias Global (jika tidak ada contextual alias).
+     */
+    public function getNamaAdminDisplayAttribute(): string
+    {
+        $namaAsli = $this->dosen->nama ?? '-';
+        $aliasKontekstual = null;
+
+        // Cek Alias Kontekstual terlebih dahulu
+        if (!empty($this->dosen_alias)) {
+            $aliasKontekstual = $this->dosen_alias;
+        } elseif ($this->dosenAliasLokal) {
+            // Karena ini untuk Admin (kelihatan referensi aslinya), kita ambil nama_asli dari dosen alias lokal
+            $aliasKontekstual = $this->dosenAliasLokal->nama;
+        } else {
+            // Jika tidak ada alias kontekstual, cek alias global
+            $aliasKontekstual = $this->dosen->nama_alias ?? null;
+        }
+
+        if (!empty($aliasKontekstual)) {
+            return "{$namaAsli} ({$aliasKontekstual})";
+        }
+
+        return $namaAsli;
+    }
 }

@@ -117,11 +117,7 @@
                                             $dosenNames = [];
                                             if ($kelas->dosenPengajars) {
                                                 foreach ($kelas->dosenPengajars as $pengajar) {
-                                                    if ($pengajar->dosenAliasLokal) {
-                                                        $dosenNames[] = $pengajar->dosenAliasLokal->nama;
-                                                    } elseif ($pengajar->dosen) {
-                                                        $dosenNames[] = $pengajar->dosen->nama;
-                                                    }
+                                                    $dosenNames[] = $pengajar->nama_admin_display;
                                                 }
                                             }
                                             $dosenString = !empty($dosenNames) ? implode(', ', $dosenNames) : 'Belum Ada Dosen';
@@ -148,10 +144,16 @@
                                                     <span class="badge rounded-pill bg-label-secondary"><i
                                                             class="ri-macbook-line me-1"></i>
                                                         {{ $jdwl->jenis_pertemuan ?? 'Tatapan Muka' }}</span>
-                                                    <a href="{{ route('admin.kelas-kuliah.show', $kelas->id) }}"
-                                                        class="btn btn-sm btn-icon btn-outline-primary" title="Lihat Detail Kelas">
-                                                        <i class="ri-external-link-line"></i>
-                                                    </a>
+                                                    <div class="d-flex gap-1">
+                                                        <a href="{{ route('admin.jadwal-global.edit', $jdwl->id) }}"
+                                                            class="btn btn-sm btn-icon btn-outline-warning" title="Edit Jadwal">
+                                                            <i class="ri-pencil-line"></i>
+                                                        </a>
+                                                        <a href="{{ route('admin.kelas-kuliah.show', $kelas->id) }}"
+                                                            class="btn btn-sm btn-icon btn-outline-primary" title="Lihat Detail Kelas">
+                                                            <i class="ri-external-link-line"></i>
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -347,6 +349,6 @@
                 var validationModal = new bootstrap.Modal(document.getElementById('modalJadwalGlobal'));
                 validationModal.show();
             @endif
-                            });
+                                    });
     </script>
 @endpush

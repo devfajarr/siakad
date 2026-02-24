@@ -92,6 +92,76 @@ class JadwalGlobalController extends Controller
     }
 
     /**
+     * Tampilkan form edit jadwal.
+     */
+    public function edit($id)
+    {
+        $jadwal = JadwalKuliah::with(['kelasKuliah.mataKuliah', 'kelasKuliah.dosenPengajars.dosen', 'ruang'])->findOrFail($id);
+        $ruangs = Ruang::orderBy('nama_ruang')->get();
+
+        // Ambil daftar dosen pengajar dari kelas ini (Hanya untuk Tampilan)
+        $dosenPengajars = $jadwal->kelasKuliah->dosenPengajars;
+
+        return view('admin.jadwal-global.edit', compact('jadwal', 'ruangs', 'dosenPengajars'));
+    }
+
+    /**
+     * Update data jadwal (Hanya Waktu & Ruang).
+     */
+    public function update(Request $request, $id)
+    {
+        $jadwal = JadwalKuliah::findOrFail($id);
+
+        $request->validate([
+            'ruang_id' => 'required|exists:ruangs,id',
+            'hari' => 'required|integer|min:1|max:7',
+            'jam_mulai' => 'required|date_format:H:i',
+            'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+            'jenis_pertemuan' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($request, $jadwal, $id) {
+                // 1. Cek Bentrok (Secara otomatis mengecek seluruh dosen di kelas ini via Service)
+                $this->jadwalService->checkBentrok(
+                    $request->ruang_id,
+                    $request->hari,
+                    $request->jam_mulai,
+                    $request->jam_selesai,
+                    $jadwal->kelas_kuliah_id,
+                    $id
+                );
+
+                // Catat perubahan untuk logging
+                $oldData = $jadwal->only(['ruang_id', 'hari', 'jam_mulai', 'jam_selesai', 'jenis_pertemuan']);
+
+                // 2. Update Data Jadwal
+                $jadwal->update([
+                    'ruang_id' => $request->ruang_id,
+                    'hari' => $request->hari,
+                    'jam_mulai' => $request->jam_mulai,
+                    'jam_selesai' => $request->jam_selesai,
+                    'jenis_pertemuan' => $request->jenis_pertemuan,
+                ]);
+
+                $newData = $jadwal->only(['ruang_id', 'hari', 'jam_mulai', 'jam_selesai', 'jenis_pertemuan']);
+                $changes = array_diff_assoc($newData, $oldData);
+
+                if (!empty($changes)) {
+                    \Illuminate\Support\Facades\Log::info("[CRUD_UPDATE] - [JadwalKuliah] ID: {$id} diperbarui oleh Admin", [
+                        'changes' => $changes
+                    ]);
+                }
+            });
+
+            return redirect()->route('admin.jadwal-global.index', ['hari' => $request->hari])
+                ->with('success', 'Jadwal kuliah berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal memperbarui jadwal: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    /**
      * AJAX endpoint untuk mendapatkan daftar Kelas Kuliah berdasarkan Semester
      */
     public function getKelasBySemester(Request $request)

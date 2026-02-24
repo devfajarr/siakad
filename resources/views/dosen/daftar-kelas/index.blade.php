@@ -11,7 +11,8 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
             <h5 class="card-title mb-0">Daftar Kelas
-                {{ $semesters->firstWhere('id_semester', $semesterId)->nama_semester ?? '' }}</h5>
+                {{ $semesters->firstWhere('id_semester', $semesterId)->nama_semester ?? '' }}
+            </h5>
 
             <form action="{{ route('dosen.kelas.index') }}" method="GET" class="d-flex align-items-center gap-2">
                 <label for="semester_id" class="form-label mb-0 text-nowrap">Filter Semester:</label>
@@ -33,7 +34,6 @@
                         <th>Kode & Nama Mata Kuliah</th>
                         <th>Nama Kelas</th>
                         <th>SKS</th>
-                        <th>Peran Pengajar</th>
                         <th>Mahasiswa Tedaftar</th>
                         <th width="100px">Action</th>
                     </tr>
@@ -52,7 +52,6 @@
                             </td>
                             <td>{{ $item->nama_kelas_kuliah }}</td>
                             <td>{{ rtrim(rtrim(number_format($item->mataKuliah->sks ?? 0, 2), '0'), '.') }}</td>
-                            <td>{{ $jenisEvaluasi }}</td>
                             <td class="text-center">
                                 <span class="badge bg-label-info">{{ $item->peserta_kelas_kuliah_count }} Mahasiswa</span>
                             </td>
@@ -61,6 +60,10 @@
                                     <a href="{{ route('dosen.kelas.show', $item->id) }}"
                                         class="btn btn-sm btn-info rounded-pill" title="Detail Kelas">
                                         <i class="ri-eye-line me-1"></i> Detail
+                                    </a>
+                                    <a href="{{ route('dosen.presensi.index', $item->id) }}"
+                                        class="btn btn-sm btn-primary rounded-pill" title="Presensi & Jurnal">
+                                        <i class="ri-contacts-book-line me-1"></i> Presensi
                                     </a>
                                 </div>
                             </td>

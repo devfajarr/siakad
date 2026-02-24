@@ -33,8 +33,7 @@ class DaftarKelasMahasiswaController extends Controller
         $kelasKuliahs = KelasKuliah::whereHas('pesertaKelasKuliah', function ($query) use ($riwayatAktif) {
             $query->where('riwayat_pendidikan_id', $riwayatAktif->id);
         })
-            ->where('id_semester', $semesterId)
-            ->with(['mataKuliah', 'dosenPengajars.dosen', 'dosenPengajars.dosenAliasLokal', 'jadwalKuliahs.ruangan'])
+            ->with(['mataKuliah', 'dosenPengajars.dosen', 'dosenPengajars.dosenAliasLokal', 'jadwalKuliahs.ruang'])
             ->get();
 
         $semesters = \App\Models\Semester::where('id_semester', '<=', getActiveSemesterId())
@@ -59,9 +58,58 @@ class DaftarKelasMahasiswaController extends Controller
         $kelasKuliah = KelasKuliah::whereHas('pesertaKelasKuliah', function ($query) use ($riwayatAktif) {
             $query->where('riwayat_pendidikan_id', $riwayatAktif->id);
         })
-            ->with(['mataKuliah', 'dosenPengajars.dosen', 'dosenPengajars.dosenAliasLokal', 'jadwalKuliahs.ruangan'])
+            ->with(['mataKuliah', 'dosenPengajars.dosen', 'dosenPengajars.dosenAliasLokal', 'jadwalKuliahs.ruang'])
             ->findOrFail($id);
 
         return view('mahasiswa.kelas.show', compact('kelasKuliah'));
+    }
+
+    /**
+     * Tampilkan log kehadiran mahasiswa pada satu kelas
+     */
+    public function presensi(string $id)
+    {
+        $user = auth()->user();
+        $mahasiswa = $user->mahasiswa;
+        $riwayatAktif = $mahasiswa->riwayatAktif;
+
+        // Ambil data mata kuliah dan dosen
+        $kelasKuliah = KelasKuliah::whereHas('pesertaKelasKuliah', function ($query) use ($riwayatAktif) {
+            $query->where('riwayat_pendidikan_id', $riwayatAktif->id);
+        })
+            ->with(['mataKuliah', 'dosenPengajars.dosen', 'dosenPengajars.dosenAliasLokal'])
+            ->withCount('presensiPertemuans')
+            ->findOrFail($id);
+
+        // Ambil daftar pertemuan dan status presensi mahasiswa ini
+        $pertemuans = \App\Models\PresensiPertemuan::where('id_kelas_kuliah', $kelasKuliah->id_kelas_kuliah)
+            ->with([
+                'presensiMahasiswas' => function ($query) use ($riwayatAktif) {
+                    $query->where('riwayat_pendidikan_id', $riwayatAktif->id);
+                }
+            ])
+            ->orderBy('pertemuan_ke', 'asc')
+            ->get();
+
+        // Hitung statistik
+        $totalHadir = 0;
+        foreach ($pertemuans as $pertemuan) {
+            $presensi = $pertemuan->presensiMahasiswas->first();
+            if ($presensi && $presensi->status_kehadiran === 'H') {
+                $totalHadir++;
+            }
+        }
+
+        $targetPertemuan = config('academic.target_pertemuan');
+        $persentase = $targetPertemuan > 0 ? round(($totalHadir / $targetPertemuan) * 100, 1) : 0;
+
+        $summary = [
+            'total_pertemuan' => $kelasKuliah->presensi_pertemuans_count,
+            'total_hadir' => $totalHadir,
+            'persentase' => $persentase,
+            'target' => $targetPertemuan
+        ];
+
+        return view('mahasiswa.presensi.show', compact('kelasKuliah', 'pertemuans', 'summary'));
     }
 }

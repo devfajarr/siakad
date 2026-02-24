@@ -22,7 +22,7 @@ class DaftarKelasController extends Controller
         })
             ->where('id_semester', $semesterId)
             ->withCount('pesertaKelasKuliah')
-            ->with(['mataKuliah', 'dosenPengajars.dosen', 'jadwalKuliahs.ruangan'])
+            ->with(['mataKuliah', 'dosenPengajars.dosen', 'jadwalKuliahs.ruang'])
             ->get();
 
         // Ambil daftar semester (hanya yang sedang berjalan dan yang lampau)
@@ -47,7 +47,7 @@ class DaftarKelasController extends Controller
         })
             ->where('id_semester', $semesterId)
             ->withCount('pesertaKelasKuliah')
-            ->with(['mataKuliah', 'dosenPengajars.dosen', 'jadwalKuliahs.ruangan', 'pesertaKelasKuliah.mahasiswa.riwayatAktif.prodi'])
+            ->with(['mataKuliah', 'dosenPengajars.dosen', 'jadwalKuliahs.ruang', 'pesertaKelasKuliah.riwayatPendidikan.mahasiswa.riwayatAktif.prodi'])
             ->findOrFail($id);
 
         return view('dosen.daftar-kelas.show', compact('kelasKuliah'));

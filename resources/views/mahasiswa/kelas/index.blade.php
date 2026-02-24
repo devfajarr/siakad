@@ -44,31 +44,39 @@
                                     </div>
                                 </td>
                                 <td>
-                                    @foreach($kelas->dosenPengajars as $pengajar)
+                                    @if($kelas->dosenPengajars->isNotEmpty())
                                         <div class="small">
                                             <i class="ri-user-follow-line text-primary me-1"></i>
-                                            {{ $pengajar->dosenAliasLokal->nama ?? ($pengajar->dosen->nama ?? '-') }}
+                                            {{ $kelas->dosenPengajars->first()->nama_tampilan }}
                                         </div>
-                                    @endforeach
+                                    @else
+                                        <span class="text-muted italic small">Belum ada dosen</span>
+                                    @endif
                                 </td>
-                                <td>{{ $kelas->mataKuliah->sks_mata_kuliah ?? 0 }}</td>
+                                <td>{{ rtrim(rtrim(number_format($kelas->sks_mk ?? ($kelas->mataKuliah->sks ?? 0), 2), '0'), '.') }}</td>
                                 <td>
                                     @forelse($kelas->jadwalKuliahs as $jadwal)
                                         <div class="small">
                                             <i class="ri-time-line text-primary me-1"></i>
                                             {{ \App\Services\JadwalKuliahService::HARI[$jadwal->hari] }},
                                             {{ substr($jadwal->jam_mulai, 0, 5) }}-{{ substr($jadwal->jam_selesai, 0, 5) }}
-                                            ({{ $jadwal->ruangan->nama_ruang ?? '?' }})
+                                            ({{ $jadwal->ruang->nama_ruang ?? '?' }})
                                         </div>
                                     @empty
                                         <span class="text-muted italic small">Jadwal belum diset</span>
                                     @endforelse
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('mahasiswa.kelas.show', $kelas->id) }}"
-                                        class="btn btn-sm btn-label-primary">
-                                        Detail
-                                    </a>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="{{ route('mahasiswa.kelas.show', $kelas->id) }}"
+                                            class="btn btn-sm btn-label-secondary">
+                                            Detail
+                                        </a>
+                                        <a href="{{ route('mahasiswa.presensi.show', $kelas->id) }}"
+                                            class="btn btn-sm btn-label-primary">
+                                            Presensi
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

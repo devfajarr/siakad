@@ -103,6 +103,12 @@
                     <div data-i18n="Kelas Perkuliahan">Kelas Perkuliahan</div>
                 </a>
             </li>
+            <li class="menu-item {{ request()->routeIs('admin.monitoring.perkuliahan') ? 'active' : '' }}">
+                <a href="{{ route('admin.monitoring.perkuliahan') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-line-chart-line"></i>
+                    <div data-i18n="Monitoring Perkuliahan">Monitoring Perkuliahan</div>
+                </a>
+            </li>
 
             <!-- Data Master / Referensi -->
             <li class="menu-header mt-5 small text-uppercase">
@@ -179,7 +185,7 @@
             <li class="menu-header mt-5 small text-uppercase">
                 <span class="menu-header-text">Ruang Dosen</span>
             </li>
-            <li class="menu-item {{ request()->routeIs('dosen.kelas.*') ? 'active' : '' }}">
+            <li class="menu-item {{ request()->routeIs(['dosen.kelas.*', 'dosen.presensi.*']) ? 'active' : '' }}">
                 <a href="{{ route('dosen.kelas.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-artboard-line"></i>
                     <div data-i18n="Daftar Kelas Saya">Daftar Kelas Saya</div>
@@ -201,7 +207,7 @@
             <li class="menu-header mt-5 small text-uppercase">
                 <span class="menu-header-text">Ruang Mahasiswa</span>
             </li>
-            <li class="menu-item {{ request()->routeIs('mahasiswa.kelas.*') ? 'active' : '' }}">
+            <li class="menu-item {{ request()->routeIs(['mahasiswa.kelas.*', 'mahasiswa.presensi.*']) ? 'active' : '' }}">
                 <a href="{{ route('mahasiswa.kelas.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-artboard-line"></i>
                     <div data-i18n="Daftar Kelas">Daftar Kelas</div>

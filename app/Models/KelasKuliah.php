@@ -188,4 +188,12 @@ class KelasKuliah extends Model
         // Foreign id default di jadwal_kuliahs adalah kelas_kuliah_id.
         return $this->hasMany(JadwalKuliah::class, 'kelas_kuliah_id');
     }
+
+    /**
+     * Relasi ke Presensi Pertemuan (Jurnal).
+     */
+    public function presensiPertemuans(): HasMany
+    {
+        return $this->hasMany(PresensiPertemuan::class, 'id_kelas_kuliah', 'id_kelas_kuliah');
+    }
 }

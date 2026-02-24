@@ -65,4 +65,12 @@ class RiwayatPendidikan extends Model
     {
         return trim($value);
     }
+
+    /**
+     * Relasi ke Data Kehadiran Mahasiswa.
+     */
+    public function presensiMahasiswas(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(PresensiMahasiswa::class, 'riwayat_pendidikan_id');
+    }
 }

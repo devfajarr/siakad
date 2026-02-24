@@ -6,6 +6,7 @@ use App\Http\Controllers\KurikulumController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MataKuliahController;
 use App\Http\Controllers\RiwayatPendidikanMahasiswaController;
+use App\Http\Controllers\JadwalGlobalController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -86,6 +87,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
             Route::get('/search/negara', 'searchNegara')->name('search.negara');
         });
 
+    Route::get('/monitoring/perkuliahan', [\App\Http\Controllers\Admin\MonitoringPerkuliahanController::class, 'index'])->name('monitoring.perkuliahan');
+
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
@@ -109,10 +112,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         'destroy' => 'admin.ruangan.destroy',
     ]);
 
-    // Route Manajemen Jadwal Terpadu (Global)
-    Route::get('jadwal-global/kelas-by-semester', [\App\Http\Controllers\JadwalGlobalController::class, 'getKelasBySemester'])->name('admin.jadwal-global.kelas-by-semester');
-    Route::get('jadwal-global', [\App\Http\Controllers\JadwalGlobalController::class, 'index'])->name('admin.jadwal-global.index');
-    Route::post('jadwal-global', [\App\Http\Controllers\JadwalGlobalController::class, 'store'])->name('admin.jadwal-global.store');
+    // Manajemen Jadwal Terpadu (Admin)
+    Route::get('/jadwal-global', [JadwalGlobalController::class, 'index'])->name('admin.jadwal-global.index');
+    Route::post('/jadwal-global', [JadwalGlobalController::class, 'store'])->name('admin.jadwal-global.store');
+    Route::get('/jadwal-global/{id}/edit', [JadwalGlobalController::class, 'edit'])->name('admin.jadwal-global.edit');
+    Route::put('/jadwal-global/{id}/update', [JadwalGlobalController::class, 'update'])->name('admin.jadwal-global.update');
+    Route::get('/jadwal-global/kelas-by-semester', [JadwalGlobalController::class, 'getKelasBySemester'])->name('admin.jadwal-global.kelas-by-semester');
 
     // Master Semester (Routing Aktivasi Global)
     Route::get('semester', [\App\Http\Controllers\SemesterController::class, 'index'])->name('admin.semester.index');
@@ -123,12 +128,20 @@ Route::middleware(['auth', 'role:Mahasiswa'])->prefix('mahasiswa')->name('mahasi
     Route::get('/dashboard', [\App\Http\Controllers\Mahasiswa\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/kelas', [\App\Http\Controllers\Mahasiswa\DaftarKelasMahasiswaController::class, 'index'])->name('kelas.index');
     Route::get('/kelas/{id}', [\App\Http\Controllers\Mahasiswa\DaftarKelasMahasiswaController::class, 'show'])->name('kelas.show');
+    Route::get('/presensi/show/{id}', [\App\Http\Controllers\Mahasiswa\DaftarKelasMahasiswaController::class, 'presensi'])->name('presensi.show');
 });
 
 Route::middleware(['auth', 'role:Dosen'])->prefix('dosen')->name('dosen.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Dosen\DashboardController::class, 'index'])->name('dashboard');
     Route::get('kelas', [\App\Http\Controllers\Dosen\DaftarKelasController::class, 'index'])->name('kelas.index');
     Route::get('kelas/{id}', [\App\Http\Controllers\Dosen\DaftarKelasController::class, 'show'])->name('kelas.show');
+
+    // Presensi & Jurnal
+    Route::get('presensi/{kelasId}', [\App\Http\Controllers\Dosen\PresensiController::class, 'index'])->name('presensi.index');
+    Route::get('presensi/{kelasId}/create', [\App\Http\Controllers\Dosen\PresensiController::class, 'create'])->name('presensi.create');
+    Route::post('presensi/{kelasId}', [\App\Http\Controllers\Dosen\PresensiController::class, 'store'])->name('presensi.store');
+    Route::get('presensi/edit/{id}', [\App\Http\Controllers\Dosen\PresensiController::class, 'edit'])->name('presensi.edit');
+    Route::put('presensi/update/{id}', [\App\Http\Controllers\Dosen\PresensiController::class, 'update'])->name('presensi.update');
 });
 
 require __DIR__ . '/auth.php';

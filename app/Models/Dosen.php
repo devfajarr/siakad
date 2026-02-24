@@ -16,6 +16,7 @@ class Dosen extends Model
         'nidn',
         'nip',
         'nama',
+        'nama_alias',
         'email',
         'tempat_lahir',
         'tanggal_lahir',
@@ -90,5 +91,50 @@ class Dosen extends Model
     public function akun()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Relasi ke Presensi yang diinput oleh Dosen ini.
+     */
+    /**
+     * Relasi ke Presensi yang diinput oleh Dosen ini.
+     */
+    public function presensiPertemuans(): HasMany
+    {
+        return $this->hasMany(PresensiPertemuan::class, 'id_dosen');
+    }
+
+    /**
+     * Accessor untuk nama tampilan dosen berdasarkan role user yang login.
+     * Admin melihat nama asli, Mahasiswa/Dosen melihat alias jika ada.
+     */
+    public function getNamaTampilanAttribute(): string
+    {
+        $user = auth()->user();
+        $namaAsli = $this->nama;
+        $namaAlias = $this->nama_alias;
+
+        // Jika Admin, tampilkan nama asli
+        if ($user && $user->hasRole('admin')) {
+            return $namaAsli;
+        }
+
+        // Selain Admin, tampilkan alias jika tidak kosong
+        return !empty($namaAlias) ? $namaAlias : $namaAsli;
+    }
+    /**
+     * Accessor untuk nama tampilan dosen khusus di halaman Admin.
+     * Format: Nama Asli (Nama Alias) jika ada alias, atau Nama Asli jika tidak ada.
+     */
+    public function getNamaAdminDisplayAttribute(): string
+    {
+        $namaAsli = $this->nama;
+        $namaAlias = $this->nama_alias;
+
+        if (!empty($namaAlias)) {
+            return "{$namaAsli} ({$namaAlias})";
+        }
+
+        return $namaAsli;
     }
 }

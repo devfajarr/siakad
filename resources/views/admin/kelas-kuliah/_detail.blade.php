@@ -442,12 +442,7 @@
                                     <td class="text-center">{{ $row->dosen->nidn ?? '-' }}</td>
                                     <td class="text-center">{{ $row->dosen->nip ?? '-' }}</td>
                                     <td>
-                                        {{ $row->dosen->nama ?? '-' }}
-                                        @if($row->dosen_alias_lokal)
-                                            <br><small class="text-primary fw-bold">Alias: {{ $row->dosen_alias_lokal->nama }}</small>
-                                        @elseif($row->dosen_alias)
-                                            <br><small class="text-primary fw-bold">Alias: {{ $row->dosen_alias }}</small>
-                                        @endif
+                                        {{ $row->nama_admin_display ?? '-' }}
                                     </td>
                                     <td class="text-center">{{ number_format((float) $row->bobot_sks, 2) }}</td>
                                     <td class="text-center">{{ $row->jumlah_rencana_pertemuan }}</td>

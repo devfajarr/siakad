@@ -23,7 +23,7 @@
                                 <option value="">Pilih Dosen</option>
                                 @foreach($daftarDosen as $d)
                                     <option value="{{ $d->id }}" {{ old('dosen_id') == $d->id ? 'selected' : '' }}>
-                                        {{ $d->nidn ? '[' . $d->nidn . '] ' : '' }}{{ $d->nama }}
+                                        {{ $d->nidn ? '[' . $d->nidn . '] ' : '' }}{{ $d->nama_admin_display }}
                                     </option>
                                 @endforeach
                             </select>
@@ -43,7 +43,7 @@
                                     <option value="">-- Tetap Gunakan Dosen Penugasan --</option>
                                     @foreach($daftarDosenLokal as $d)
                                         <option value="{{ $d->id }}" {{ old('id_dosen_alias_lokal') == $d->id ? 'selected' : '' }}>
-                                            {{ $d->nama }}
+                                            {{ $d->nama_admin_display }}
                                         </option>
                                     @endforeach
                                 </select>

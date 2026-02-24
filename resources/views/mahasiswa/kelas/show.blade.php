@@ -5,13 +5,18 @@
 @section('content')
     <div class="row">
         <div class="col-12">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-4">
-                    <li class="breadcrumb-item"><a href="{{ route('mahasiswa.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('mahasiswa.kelas.index') }}">Daftar Kelas</a></li>
-                    <li class="breadcrumb-item active">Detail Kelas</li>
-                </ol>
-            </nav>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('mahasiswa.dashboard') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('mahasiswa.kelas.index') }}">Daftar Kelas</a></li>
+                        <li class="breadcrumb-item active">Detail Kelas</li>
+                    </ol>
+                </nav>
+                <a href="{{ route('mahasiswa.kelas.index') }}" class="btn btn-label-secondary">
+                    <i class="ri-arrow-left-line me-1"></i> Kembali ke Daftar Kelas
+                </a>
+            </div>
         </div>
     </div>
 
@@ -92,7 +97,7 @@
                                     {{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}
                                 </p>
                                 <small class="text-primary">
-                                    <i class="ri-map-pin-line me-1"></i> {{ $jadwal->ruangan->nama_ruang ?? 'Ruangan TBD' }}
+                                    <i class="ri-map-pin-line me-1"></i> {{ $jadwal->ruang->nama_ruang ?? 'Ruangan TBD' }}
                                 </small>
                             </div>
                         </div>
