@@ -68,22 +68,16 @@
             <li class="menu-header mt-5 small text-uppercase">
                 <span class="menu-header-text">Sivitas Akademika</span>
             </li>
-            <li class="menu-item {{ request()->routeIs('admin.dosen.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.dosen.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ri-user-line"></i>
-                    <div data-i18n="Data Dosen">Data Dosen</div>
-                </a>
-            </li>
             <li class="menu-item {{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}">
                 <a href="{{ route('admin.mahasiswa.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-graduation-cap-line"></i>
                     <div data-i18n="Data Mahasiswa">Data Mahasiswa</div>
                 </a>
             </li>
-            <li class="menu-item {{ request()->routeIs('admin.pembimbing-akademik.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.pembimbing-akademik.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ri-user-settings-line"></i>
-                    <div data-i18n="Mapping PA">Mapping Dosen PA</div>
+            <li class="menu-item {{ request()->routeIs('admin.dosen.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.dosen.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-user-line"></i>
+                    <div data-i18n="Data Dosen">Data Dosen</div>
                 </a>
             </li>
 
@@ -113,6 +107,23 @@
                 <a href="{{ route('admin.monitoring.perkuliahan') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-line-chart-line"></i>
                     <div data-i18n="Monitoring Perkuliahan">Monitoring Perkuliahan</div>
+                </a>
+            </li>
+
+            <!-- Manajemen Jabatan -->
+            <li class="menu-header mt-5 small text-uppercase">
+                <span class="menu-header-text">Manajemen Jabatan</span>
+            </li>
+            <li class="menu-item {{ request()->routeIs('admin.kaprodi.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.kaprodi.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-user-star-line"></i>
+                    <div data-i18n="Kaprodi">Kaprodi</div>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('admin.pembimbing-akademik.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.pembimbing-akademik.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-user-settings-line"></i>
+                    <div data-i18n="Dosen PA">Dosen PA</div>
                 </a>
             </li>
 

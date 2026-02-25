@@ -69,8 +69,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::resource('peserta-kelas-kuliah', \App\Http\Controllers\PesertaKelasKuliahController::class)
         ->only(['store', 'destroy']);
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
-    Route::post('users/{user}/assign-role', [\App\Http\Controllers\Admin\UserController::class, 'assignRole'])->name('users.assign-role');
+    Route::resource('users', \App\Http\Controllers\Admin\StaffUserController::class);
+    Route::post('users/{user}/assign-role', [\App\Http\Controllers\Admin\StaffUserController::class, 'assignRole'])->name('users.assign-role');
 
     Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
 
@@ -96,6 +96,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // KRS Period Settings
     Route::resource('krs-period', \App\Http\Controllers\Admin\KrsPeriodController::class);
+
+    // Manajemen Kaprodi
+    Route::get('kaprodi/search-dosen', [\App\Http\Controllers\Admin\KaprodiController::class, 'searchDosen'])->name('kaprodi.search-dosen');
+    Route::resource('kaprodi', \App\Http\Controllers\Admin\KaprodiController::class);
 
 });
 

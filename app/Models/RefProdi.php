@@ -37,4 +37,12 @@ class RefProdi extends Model
     {
         return $this->belongsTo(RefPerguruanTinggi::class, 'id_perguruan_tinggi');
     }
+
+    /**
+     * Relationship to Kaprodi record.
+     */
+    public function kaprodi(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Kaprodi::class, 'id_prodi');
+    }
 }

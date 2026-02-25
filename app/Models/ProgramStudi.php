@@ -18,5 +18,14 @@ class ProgramStudi extends Model
         'status',
         'id_jenjang_pendidikan',
         'nama_jenjang_pendidikan',
+        'id_perguruan_tinggi',
     ];
+
+    /**
+     * Relasi ke jabatan Kaprodi Aktif.
+     */
+    public function kaprodi(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Kaprodi::class, 'id_prodi', 'id_prodi');
+    }
 }

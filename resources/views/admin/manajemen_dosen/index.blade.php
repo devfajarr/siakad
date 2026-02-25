@@ -4,19 +4,39 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
                 <h5 class="mb-0">Manajemen Dosen & Hak Akses (RBAC)</h5>
                 
-                <!-- Filter Jabatan -->
-                <form action="{{ route('admin.users.index') }}" method="GET" class="d-flex align-items-center">
-                    <label for="role" class="me-2 mb-0">Filter Jabatan:</label>
-                    <select name="role" id="role" class="form-select form-select-sm w-auto me-2" onchange="this.form.submit()">
-                        <option value="">-- Semua Jabatan --</option>
-                        @foreach($allRoles as $id => $name)
-                            <option value="{{ $name }}" {{ request('role') == $name ? 'selected' : '' }}>{{ $name }}</option>
-                        @endforeach
-                    </select>
-                </form>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <!-- Pencarian Keyword -->
+                    <form action="{{ route('admin.users.index') }}" method="GET" class="d-flex align-items-center gap-2">
+                        @if(request('role'))
+                            <input type="hidden" name="role" value="{{ request('role') }}">
+                        @endif
+                        <div class="input-group input-group-sm">
+                            {{-- <span class="input-group-text"><i class="ri-search-line"></i></span> --}}
+                            <input type="text" name="search" class="form-control" placeholder="Cari Nama/Username..." value="{{ request('search') }}">
+                            <button class="btn btn-outline-primary" type="submit">Cari</button>
+                            @if(request('search'))
+                                <a href="{{ route('admin.users.index', request()->only('role')) }}" class="btn btn-outline-secondary">Reset</a>
+                            @endif
+                        </div>
+                    </form>
+
+                    <!-- Filter Jabatan -->
+                    <form action="{{ route('admin.users.index') }}" method="GET" class="d-flex align-items-center gap-2">
+                        @if(request('search'))
+                            <input type="hidden" name="search" value="{{ request('search') }}">
+                        @endif
+                        <label for="role" class="mb-0 text-nowrap">Filter Jabatan:</label>
+                        <select name="role" id="role" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                            <option value="">-- Semua Jabatan --</option>
+                            @foreach($allRoles as $id => $name)
+                                <option value="{{ $name }}" {{ request('role') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
             </div>
             
             <div class="table-responsive text-nowrap">
@@ -58,7 +78,15 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">Tidak ada data dosen ditemukan.</td>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="text-light small fw-medium mb-3">
+                                    <i class="ri-user-search-line ri-48px mb-3 text-muted"></i>
+                                    <p class="mb-0">Tidak ada data dosen atau staf yang ditemukan sesuai kriteria.</p>
+                                    @if(request('search') || request('role'))
+                                        <a href="{{ route('admin.users.index') }}" class="btn btn-sm btn-label-secondary mt-3">Reset Semua Filter</a>
+                                    @endif
+                                </div>
+                            </td>
                         </tr>
                         @endforelse
                     </tbody>
