@@ -89,6 +89,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('/monitoring/perkuliahan', [\App\Http\Controllers\Admin\MonitoringPerkuliahanController::class, 'index'])->name('monitoring.perkuliahan');
 
+    // Pembimbing Akademik mapping (Collective)
+    Route::get('pembimbing-akademik/dosen-by-prodi/{id_prodi}', [\App\Http\Controllers\Admin\PembimbingAkademikController::class, 'getDosenByProdi'])->name('pembimbing-akademik.dosen-by-prodi');
+    Route::post('pembimbing-akademik/copy-semester', [\App\Http\Controllers\Admin\PembimbingAkademikController::class, 'copySemester'])->name('pembimbing-akademik.copy-semester');
+    Route::resource('pembimbing-akademik', \App\Http\Controllers\Admin\PembimbingAkademikController::class);
+
+    // KRS Period Settings
+    Route::resource('krs-period', \App\Http\Controllers\Admin\KrsPeriodController::class);
+
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
@@ -128,13 +136,20 @@ Route::middleware(['auth', 'role:Mahasiswa'])->prefix('mahasiswa')->name('mahasi
     Route::get('/dashboard', [\App\Http\Controllers\Mahasiswa\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/kelas', [\App\Http\Controllers\Mahasiswa\DaftarKelasMahasiswaController::class, 'index'])->name('kelas.index');
     Route::get('/kelas/{id}', [\App\Http\Controllers\Mahasiswa\DaftarKelasMahasiswaController::class, 'show'])->name('kelas.show');
+    Route::get('/jadwal', [\App\Http\Controllers\Mahasiswa\JadwalController::class, 'index'])->name('jadwal.index');
     Route::get('/presensi/show/{id}', [\App\Http\Controllers\Mahasiswa\DaftarKelasMahasiswaController::class, 'presensi'])->name('presensi.show');
+
+    // KRS Online
+    Route::get('krs', [\App\Http\Controllers\Mahasiswa\KrsController::class, 'index'])->name('krs.index');
+    Route::post('krs/submit', [\App\Http\Controllers\Mahasiswa\KrsController::class, 'submit'])->name('krs.submit');
+    Route::get('krs/print', [\App\Http\Controllers\Mahasiswa\KrsController::class, 'print'])->name('krs.print');
 });
 
 Route::middleware(['auth', 'role:Dosen'])->prefix('dosen')->name('dosen.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Dosen\DashboardController::class, 'index'])->name('dashboard');
     Route::get('kelas', [\App\Http\Controllers\Dosen\DaftarKelasController::class, 'index'])->name('kelas.index');
     Route::get('kelas/{id}', [\App\Http\Controllers\Dosen\DaftarKelasController::class, 'show'])->name('kelas.show');
+    Route::get('jadwal', [\App\Http\Controllers\Dosen\JadwalController::class, 'index'])->name('jadwal.index');
 
     // Presensi & Jurnal
     Route::get('presensi/{kelasId}', [\App\Http\Controllers\Dosen\PresensiController::class, 'index'])->name('presensi.index');
@@ -142,6 +157,11 @@ Route::middleware(['auth', 'role:Dosen'])->prefix('dosen')->name('dosen.')->grou
     Route::post('presensi/{kelasId}', [\App\Http\Controllers\Dosen\PresensiController::class, 'store'])->name('presensi.store');
     Route::get('presensi/edit/{id}', [\App\Http\Controllers\Dosen\PresensiController::class, 'edit'])->name('presensi.edit');
     Route::put('presensi/update/{id}', [\App\Http\Controllers\Dosen\PresensiController::class, 'update'])->name('presensi.update');
+
+    // Perwalian / KRS Approval
+    Route::resource('perwalian', \App\Http\Controllers\Dosen\KrsApprovalController::class)->only(['index', 'show']);
+    Route::post('perwalian/{id}/approve', [\App\Http\Controllers\Dosen\KrsApprovalController::class, 'approve'])->name('perwalian.approve');
+    Route::get('perwalian/{id}/print', [\App\Http\Controllers\Dosen\KrsApprovalController::class, 'print'])->name('perwalian.print');
 });
 
 require __DIR__ . '/auth.php';

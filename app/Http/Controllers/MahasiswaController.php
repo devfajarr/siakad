@@ -25,6 +25,7 @@ use App\Services\Feeder\Reference\ReferenceProgramStudiService;
 use App\Services\Feeder\Reference\ReferenceProfilPTService;
 
 use App\Services\Feeder\Reference\ReferenceDataSyncService;
+use Illuminate\Support\Facades\Log;
 
 class MahasiswaController extends Controller
 {
@@ -326,8 +327,70 @@ class MahasiswaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Logic to update data would go here
-        return redirect()->route('admin.mahasiswa.index')->with('success', 'Data mahasiswa berhasil diperbarui.');
+        $mahasiswa = Mahasiswa::findOrFail($id);
+
+        $validated = $request->validate([
+            // Data Utama
+            'nama_mahasiswa' => 'required|string|max:100',
+            'tempat_lahir' => 'required|string|max:32',
+            'tanggal_lahir' => 'required|date',
+            'jenis_kelamin' => 'required|in:L,P',
+            'id_agama' => 'required|integer',
+            'nama_ibu_kandung' => 'required|string|max:100',
+            'bypass_krs_until' => 'nullable|date',
+
+            // Alamat & Kontak
+            'kewarganegaraan' => 'required|string|size:2',
+            'nik' => 'required|string|max:16',
+            'nisn' => 'required|string|max:10',
+            'npwp' => 'nullable|string|max:255',
+            'jalan' => 'nullable|string|max:255',
+            'handphone' => 'required|string|max:20',
+            'dusun' => 'nullable|string|max:255',
+            'rt' => 'nullable|integer',
+            'rw' => 'nullable|integer',
+            'kelurahan' => 'required|string|max:60',
+            'kode_pos' => 'nullable|string|max:255',
+            'email' => 'required|email|max:60',
+            'penerima_kps' => 'required|boolean',
+            'id_wilayah' => 'required|string|max:8',
+            'id_jenis_tinggal' => 'nullable|integer',
+            'id_alat_transportasi' => 'nullable|integer',
+
+            // Orang Tua (Ayah)
+            'nama_ayah' => 'nullable|string|max:255',
+            'nik_ayah' => 'nullable|string|max:16',
+            'tgl_lahir_ayah' => 'nullable|date',
+            'id_pendidikan_ayah' => 'nullable|integer',
+            'id_pekerjaan_ayah' => 'nullable|integer',
+            'id_penghasilan_ayah' => 'nullable|integer',
+
+            // Orang Tua (Ibu)
+            'nik_ibu' => 'nullable|string|max:16',
+            'tgl_lahir_ibu' => 'nullable|date',
+            'id_pendidikan_ibu' => 'nullable|integer',
+            'id_pekerjaan_ibu' => 'nullable|integer',
+            'id_penghasilan_ibu' => 'nullable|integer',
+
+            // Wali
+            'nama_wali' => 'nullable|string|max:255',
+            'tgl_lahir_wali' => 'nullable|date',
+            'id_pendidikan_wali' => 'nullable|integer',
+            'id_pekerjaan_wali' => 'nullable|integer',
+            'id_penghasilan_wali' => 'nullable|integer',
+        ]);
+
+        $changes = array_diff_assoc($validated, $mahasiswa->toArray());
+
+        $mahasiswa->update($validated + [
+            'is_local_change' => true,
+            'status_sinkronisasi' => 'updated_local',
+        ]);
+
+        Log::info("CRUD_UPDATE: Mahasiswa diubah", ['id' => $mahasiswa->id, 'changes' => $changes]);
+
+        return redirect()->route('admin.mahasiswa.detail', $id)
+            ->with('success', 'Data mahasiswa berhasil diperbarui.');
     }
 
     public function destroy(string $id)

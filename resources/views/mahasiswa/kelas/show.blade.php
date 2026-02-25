@@ -65,7 +65,7 @@
                                 <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                     <div class="me-2">
                                         <h6 class="mb-0">
-                                            {{ $pengajar->dosenAliasLokal->nama ?? ($pengajar->dosen->nama ?? '-') }}</h6>
+                                            {{ $pengajar->nama_tampilan }}</h6>
                                         <small
                                             class="text-muted">{{ $pengajar->dosen->nidn ?? ($pengajar->dosen->nip ?? 'Dosen Luar') }}</small>
                                     </div>

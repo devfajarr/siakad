@@ -88,6 +88,34 @@ class Dosen extends Model
         return $this->hasMany(DosenPengajarKelasKuliah::class, 'id_dosen');
     }
 
+    /**
+     * Relasi ke Pembimbing Akademik (Bridge).
+     */
+    public function pembimbingAkademik(): HasMany
+    {
+        return $this->hasMany(PembimbingAkademik::class, 'id_dosen');
+    }
+
+    /**
+     * Relasi langsung ke Mahasiswa Bimbingan.
+     */
+    /**
+     * Data Mahasiswa Bimbingan (Dinamis per Semester Aktif).
+     */
+    public function mahasiswaBimbingan()
+    {
+        $activeSemesterId = getActiveSemesterId();
+
+        // Dapatkan daftar Prodi yang dibimbing oleh dosen ini di semester aktif
+        $prodiIds = PembimbingAkademik::where('id_dosen', $this->id)
+            ->where('id_semester', $activeSemesterId)
+            ->pluck('id_prodi');
+
+        return Mahasiswa::whereHas('riwayatAktif', function ($q) use ($prodiIds) {
+            $q->whereIn('id_prodi', $prodiIds);
+        });
+    }
+
     public function akun()
     {
         return $this->belongsTo(User::class, 'user_id');

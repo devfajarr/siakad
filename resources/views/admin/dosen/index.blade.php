@@ -228,7 +228,7 @@
             });
 
             // Handle Edit Button
-            $('.btn-edit').on('click', function () {
+            $(document).on('click', '.btn-edit', function () {
                 const data = $(this).data('dosen');
                 const updateUrl = "{{ route('admin.dosen.update', ':id') }}".replace(':id', data.id);
 
@@ -251,7 +251,7 @@
             });
 
             // Handle View Button (for Pusat & Lokal)
-            $('.btn-view').on('click', function () {
+            $(document).on('click', '.btn-view', function () {
                 const data = $(this).data('dosen');
                 const modal = $('#viewDosenModal');
 
@@ -270,7 +270,7 @@
             });
 
             // Delete Confirmation
-            $('.btn-delete').on('click', function (e) {
+            $(document).on('click', '.btn-delete', function (e) {
                 e.preventDefault();
                 const form = $(this).closest('form');
 
@@ -287,14 +287,14 @@
                     },
                     buttonsStyling: false
                 }).then(function (result) {
-                    if (result.value) {
+                    if (result.isConfirmed) {
                         form.submit();
                     }
                 });
             });
 
             // Generate Single User Confirmation
-            $('.btn-generate').on('click', function (e) {
+            $(document).on('click', '.btn-generate', function (e) {
                 e.preventDefault();
                 const form = $(this).closest('form');
                 Swal.fire({
@@ -310,7 +310,7 @@
                     },
                     buttonsStyling: false
                 }).then(function (result) {
-                    if (result.value) {
+                    if (result.isConfirmed) {
                         form.submit();
                     }
                 });
@@ -333,11 +333,11 @@
             }
 
             selectAll.on('change', function () {
-                checkboxes.prop('checked', $(this).prop('checked'));
+                $('.dosen-checkbox').prop('checked', $(this).prop('checked'));
                 updateBulkAction();
             });
 
-            checkboxes.on('change', function () {
+            $(document).on('change', '.dosen-checkbox', function () {
                 if (!$(this).prop('checked')) {
                     selectAll.prop('checked', false);
                 }
@@ -362,7 +362,7 @@
                     },
                     buttonsStyling: false
                 }).then(function (result) {
-                    if (result.value) {
+                    if (result.isConfirmed) {
                         // Append hidden inputs
                         bulkForm.find('.appended-input').remove(); // clear previous
                         checked.each(function () {

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Semester extends Model
 {
@@ -58,5 +59,15 @@ class Semester extends Model
 
         // 3. Hancurkan Cache Global Helper
         \Illuminate\Support\Facades\Cache::forget('active_semester_object');
+    }
+
+    // ─── Relationships ──────────────────────────────────────
+
+    /**
+     * Relasi ke Kelas Kuliah pada semester ini.
+     */
+    public function kelasKuliah(): HasMany
+    {
+        return $this->hasMany(KelasKuliah::class, 'id_semester', 'id_semester');
     }
 }

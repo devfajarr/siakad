@@ -9,6 +9,25 @@ class Mahasiswa extends Model
     protected $table = 'mahasiswas';
     // Allow mass assignment for all except ID (handled by Auto-Increment)
     protected $guarded = ['id'];
+    protected $fillable = [
+        'id_mahasiswa',
+        'id_feeder',
+        'nama_mahasiswa',
+        'jenis_kelamin',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'id_agama',
+        'nik',
+        'nisn',
+        'nama_ibu_kandung',
+        'id_wilayah',
+        'kelurahan',
+        'handphone',
+        'email',
+        'id_prodi',
+        'user_id',
+        'bypass_krs_until',
+    ];
 
     public function user()
     {
@@ -23,6 +42,7 @@ class Mahasiswa extends Model
         'tgl_lahir_ayah' => 'date',
         'tgl_lahir_ibu' => 'date',
         'tgl_lahir_wali' => 'date',
+        'bypass_krs_until' => 'datetime',
     ];
 
     /**
@@ -66,6 +86,14 @@ class Mahasiswa extends Model
         return $this->belongsTo(Agama::class, 'id_agama', 'id_agama');
     }
 
+    /**
+     * Accessor: Get NIM from active education history.
+     */
+    public function getNimAttribute()
+    {
+        return $this->riwayatAktif?->nim;
+    }
+
     public function jenisTinggal()
     {
         return $this->belongsTo(JenisTinggal::class, 'id_jenis_tinggal', 'id_jenis_tinggal');
@@ -79,6 +107,24 @@ class Mahasiswa extends Model
     public function wilayah()
     {
         return $this->belongsTo(ReferenceWilayah::class, 'id_wilayah', 'id_wilayah');
+    }
+
+    /**
+     * Dapatkan Dosen PA (Dinamis per Semester Aktif & Prodi).
+     */
+    public function getDosenPembimbingAttribute()
+    {
+        $activeSemesterId = getActiveSemesterId();
+        $idProdi = $this->riwayatAktif?->id_prodi;
+
+        if (!$idProdi || !$activeSemesterId)
+            return null;
+
+        $pa = PembimbingAkademik::where('id_prodi', $idProdi)
+            ->where('id_semester', $activeSemesterId)
+            ->first();
+
+        return $pa ? $pa->dosen : null;
     }
 
     // Note: Parent education/job/income are stored as IDs on this table (e.g. id_pekerjaan_ayah), 

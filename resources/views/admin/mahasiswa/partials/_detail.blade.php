@@ -35,6 +35,11 @@
                         <x-forms.input name="nama_ibu_kandung" label="Nama Ibu Kandung" required="true"
                             :value="$mahasiswa->nama_ibu_kandung" />
                     </div>
+                    <div class="col-md-6">
+                        <x-forms.datepicker name="bypass_krs_until" label="Izin Bypass KRS Hingga"
+                            :value="$mahasiswa->bypass_krs_until ? $mahasiswa->bypass_krs_until->format('Y-m-d') : ''" 
+                            helper="Mahasiswa dapat mengisi KRS hingga tanggal ini meskipun periode global ditutup." />
+                    </div>
                 </div>
             </div>
         </div>

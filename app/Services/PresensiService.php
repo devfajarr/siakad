@@ -68,6 +68,7 @@ class PresensiService
             ->join('riwayat_pendidikans as rp', 'pkk.riwayat_pendidikan_id', '=', 'rp.id')
             ->join('mahasiswas as m', 'rp.id_mahasiswa', '=', 'm.id')
             ->where('pkk.id_kelas_kuliah', $idKelasKuliah)
+            ->where('pkk.status_krs', 'acc')
             ->select('m.nama_mahasiswa', 'rp.nim', 'rp.id as rp_id')
             ->get();
 

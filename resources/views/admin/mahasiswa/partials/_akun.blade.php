@@ -87,7 +87,7 @@
                                 </button>
                             </form>
                             <small class="text-muted d-block mt-1">Mengembalikan kata sandi sesuai dengan Default bawaan
-                                sistem (NIM/NISN).</small>
+                                sistem (NIM).</small>
                         </div>
 
                         <hr class="my-1">

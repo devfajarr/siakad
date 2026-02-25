@@ -20,5 +20,14 @@ class AppServiceProvider extends ServiceProvider
     {
         \App\Models\Dosen::observe(\App\Observers\DosenObserver::class);
         \Illuminate\Pagination\Paginator::useBootstrapFive();
+
+        \Illuminate\Support\Facades\Gate::define('is-academic-advisor', function (\App\Models\User $user) {
+            if (!$user->dosen) {
+                return false;
+            }
+            return \App\Models\PembimbingAkademik::where('id_dosen', $user->dosen->id)
+                ->where('id_semester', getActiveSemesterId())
+                ->exists();
+        });
     }
 }

@@ -36,6 +36,9 @@ class PesertaKelasKuliah extends Model
         'last_synced_at',
         'last_push_at',
         'sync_error_message',
+        'status_krs',
+        'acc_by',
+        'last_acc_at',
     ];
 
     protected $casts = [
@@ -45,6 +48,7 @@ class PesertaKelasKuliah extends Model
         'is_deleted_server' => 'boolean',
         'last_synced_at' => 'datetime',
         'last_push_at' => 'datetime',
+        'last_acc_at' => 'datetime',
     ];
 
     // ─── Scopes ─────────────────────────────────────────────

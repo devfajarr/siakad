@@ -25,10 +25,13 @@ class MahasiswaAccountGenerationService
             return false; // Sudah punya akun
         }
 
-        $username = $mahasiswa->nim ?? $mahasiswa->nisn;
+        $username = $mahasiswa->nim;
         if (!$username) {
-            throw new \Exception('Mahasiswa tidak memiliki NIM atau NISN, gagal membuat username.');
+            throw new \Exception('Mahasiswa tidak memiliki NIM, gagal membuat username.');
         }
+
+        // Pastikan username bersih dari spasi (penting untuk NIM dari database)
+        $username = trim($username);
 
         DB::beginTransaction();
         try {

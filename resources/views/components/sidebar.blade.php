@@ -80,6 +80,12 @@
                     <div data-i18n="Data Mahasiswa">Data Mahasiswa</div>
                 </a>
             </li>
+            <li class="menu-item {{ request()->routeIs('admin.pembimbing-akademik.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.pembimbing-akademik.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-user-settings-line"></i>
+                    <div data-i18n="Mapping PA">Mapping Dosen PA</div>
+                </a>
+            </li>
 
             <!-- Perkuliahan -->
             <li class="menu-header mt-5 small text-uppercase">
@@ -118,6 +124,12 @@
                 <a href="{{ route('admin.semester.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-bookmark-3-line"></i>
                     <div data-i18n="Master Semester">Master Semester</div>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('admin.krs-period.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.krs-period.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-time-line"></i>
+                    <div data-i18n="Periode KRS">Periode KRS Online</div>
                 </a>
             </li>
             <li class="menu-item {{ request()->routeIs('admin.jadwal-global.*') ? 'active' : '' }}">
@@ -191,8 +203,8 @@
                     <div data-i18n="Daftar Kelas Saya">Daftar Kelas Saya</div>
                 </a>
             </li>
-            <li class="menu-item">
-                <a href="#" class="menu-link">
+            <li class="menu-item {{ request()->routeIs('dosen.jadwal.*') ? 'active' : '' }}">
+                <a href="{{ route('dosen.jadwal.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-calendar-todo-line"></i>
                     <div data-i18n="Jadwal Mengajar">Jadwal Mengajar</div>
                 </a>
@@ -203,6 +215,14 @@
                     <div data-i18n="Input Nilai Mahasiswa">Input Nilai Mahasiswa</div>
                 </a>
             </li>
+            @can('is-academic-advisor')
+                <li class="menu-item {{ request()->routeIs('dosen.perwalian.*') ? 'active' : '' }}">
+                    <a href="{{ route('dosen.perwalian.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ri-group-line"></i>
+                        <div data-i18n="Perwalian">Perwalian / ACC KRS</div>
+                    </a>
+                </li>
+            @endcan
         @elseif(session('active_role') == 'Mahasiswa')
             <li class="menu-header mt-5 small text-uppercase">
                 <span class="menu-header-text">Ruang Mahasiswa</span>
@@ -213,14 +233,14 @@
                     <div data-i18n="Daftar Kelas">Daftar Kelas</div>
                 </a>
             </li>
-            <li class="menu-item">
-                <a href="#" class="menu-link">
+            <li class="menu-item {{ request()->routeIs('mahasiswa.jadwal.*') ? 'active' : '' }}">
+                <a href="{{ route('mahasiswa.jadwal.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-calendar-todo-line"></i>
                     <div data-i18n="Jadwal Saya">Jadwal Saya</div>
                 </a>
             </li>
-            <li class="menu-item">
-                <a href="#" class="menu-link">
+            <li class="menu-item {{ request()->routeIs('mahasiswa.krs.*') ? 'active' : '' }}">
+                <a href="{{ route('mahasiswa.krs.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-file-list-3-line"></i>
                     <div data-i18n="KRS Online">KRS Online</div>
                 </a>

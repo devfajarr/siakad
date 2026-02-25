@@ -50,6 +50,11 @@ class PresensiController extends Controller
                         ->orderBy('pertemuan_ke', 'asc');
                 }
             ])
+            ->withCount([
+                'pesertaKelasKuliah as peserta_count' => function ($query) {
+                    $query->where('status_krs', 'acc');
+                }
+            ])
             ->firstOrFail();
 
         // Jika user mengakses via UUID, redirect ke URL berbasis ID integer (SEO & Konsistensi)
@@ -78,7 +83,13 @@ class PresensiController extends Controller
                 $query->where('id_dosen', $dosenId)
                     ->orWhere('id_dosen_alias_lokal', $dosenId);
             })
-            ->with(['mataKuliah', 'jadwalKuliahs.ruang', 'pesertaKelasKuliah.riwayatPendidikan.mahasiswa'])
+            ->with([
+                'mataKuliah',
+                'jadwalKuliahs.ruang',
+                'pesertaKelasKuliah' => function ($query) {
+                    $query->where('status_krs', 'acc')->with('riwayatPendidikan.mahasiswa');
+                }
+            ])
             ->firstOrFail();
 
         // Redirect ke ID numeric jika perlu
