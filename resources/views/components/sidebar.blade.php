@@ -194,8 +194,9 @@
                 </a>
             </li>
         @elseif(session('active_role') == 'Dosen')
+            {{-- ── Ruang Dosen (Pengajaran) ────────────────────── --}}
             <li class="menu-header mt-5 small text-uppercase">
-                <span class="menu-header-text">Ruang Dosen</span>
+                <span class="menu-header-text">Pengajaran</span>
             </li>
             <li class="menu-item {{ request()->routeIs(['dosen.kelas.*', 'dosen.presensi.*']) ? 'active' : '' }}">
                 <a href="{{ route('dosen.kelas.index') }}" class="menu-link">
@@ -215,11 +216,16 @@
                     <div data-i18n="Input Nilai Mahasiswa">Input Nilai Mahasiswa</div>
                 </a>
             </li>
+
+            {{-- ── Ruang Dosen PA (Pembimbing Akademik) ─────────── --}}
             @can('is-academic-advisor')
-                <li class="menu-item {{ request()->routeIs('dosen.perwalian.*') ? 'active' : '' }}">
+                <li class="menu-header mt-5 small text-uppercase">
+                    <span class="menu-header-text">Pembimbing Akademik</span>
+                </li>
+                <li class="menu-item {{ request()->routeIs('dosen.perwalian.index') ? 'active' : '' }}">
                     <a href="{{ route('dosen.perwalian.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons ri-group-line"></i>
-                        <div data-i18n="Perwalian">Perwalian / ACC KRS</div>
+                        <div data-i18n="Mahasiswa Bimbingan">Mahasiswa Bimbingan</div>
                     </a>
                 </li>
             @endcan
