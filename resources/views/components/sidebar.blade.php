@@ -188,23 +188,7 @@
         @endif
 
         {{-- CONTOH ACTIVE ROLE UX UNTUK DOSEN / KAPRODI --}}
-        @if(session('active_role') == 'Kaprodi')
-            <li class="menu-header mt-5 small text-uppercase">
-                <span class="menu-header-text">Ruang Kaprodi</span>
-            </li>
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="menu-icon tf-icons ri-team-line"></i>
-                    <div data-i18n="Monitoring Dosen Pengajar">Monitoring Dosen Pengajar</div>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="menu-icon tf-icons ri-file-list-3-line"></i>
-                    <div data-i18n="Persetujuan KRS">Persetujuan KRS</div>
-                </a>
-            </li>
-        @elseif(session('active_role') == 'Dosen')
+        @if(session('active_role') == 'Dosen')
             {{-- ── Ruang Dosen (Pengajaran) ────────────────────── --}}
             <li class="menu-header mt-5 small text-uppercase">
                 <span class="menu-header-text">Pengajaran</span>
@@ -240,6 +224,31 @@
                     </a>
                 </li>
             @endcan
+
+            {{-- ── Ruang Kaprodi (Integrated) ──────────────────── --}}
+            @if(auth()->user()->hasRole('Kaprodi'))
+                <li class="menu-header mt-5 small text-uppercase">
+                    <span class="menu-header-text">Ruang Kaprodi</span>
+                </li>
+                <li class="menu-item {{ request()->routeIs('dosen.monitoring-kaprodi.*') ? 'active' : '' }}">
+                    <a href="{{ route('dosen.monitoring-kaprodi.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ri-line-chart-line"></i>
+                        <div data-i18n="Monitoring Perkuliahan">Monitoring Perkuliahan</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link">
+                        <i class="menu-icon tf-icons ri-team-line"></i>
+                        <div data-i18n="Monitoring Dosen Pengajar">Monitoring Dosen Pengajar</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link">
+                        <i class="menu-icon tf-icons ri-file-list-3-line"></i>
+                        <div data-i18n="Persetujuan KRS">Persetujuan KRS</div>
+                    </a>
+                </li>
+            @endif
         @elseif(session('active_role') == 'Mahasiswa')
             <li class="menu-header mt-5 small text-uppercase">
                 <span class="menu-header-text">Ruang Mahasiswa</span>

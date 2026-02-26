@@ -19,6 +19,20 @@ Route::middleware(['auth'])->group(function () {
         if (!session()->has('active_role') && auth()->user()->roles->count() > 0) {
             session(['active_role' => auth()->user()->roles->first()->name]);
         }
+
+        $activeRole = session('active_role');
+        $routeName = match ($activeRole) {
+            'admin' => 'admin.dashboard',
+            'Dosen' => 'dosen.dashboard',
+            'Mahasiswa' => 'mahasiswa.dashboard',
+            'Kaprodi' => 'kaprodi.dashboard',
+            default => null,
+        };
+
+        if ($routeName && Route::has($routeName)) {
+            return redirect()->route($routeName);
+        }
+
         return view('dashboard.index');
     })->name('dashboard');
 
@@ -166,6 +180,13 @@ Route::middleware(['auth', 'role:Dosen'])->prefix('dosen')->name('dosen.')->grou
     Route::resource('perwalian', \App\Http\Controllers\Dosen\KrsApprovalController::class)->only(['index', 'show']);
     Route::post('perwalian/{id}/approve', [\App\Http\Controllers\Dosen\KrsApprovalController::class, 'approve'])->name('perwalian.approve');
     Route::get('perwalian/{id}/print', [\App\Http\Controllers\Dosen\KrsApprovalController::class, 'print'])->name('perwalian.print');
+
+    // Monitoring Kaprodi (Integrated into Dosen namespace)
+    Route::prefix('monitoring-kaprodi')->name('monitoring-kaprodi.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Dosen\Kaprodi\MonitoringController::class, 'index'])->name('index');
+        Route::get('/kelas/{id}', [\App\Http\Controllers\Dosen\Kaprodi\MonitoringController::class, 'show'])->name('show');
+    });
 });
+
 
 require __DIR__ . '/auth.php';

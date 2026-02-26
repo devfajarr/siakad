@@ -22,7 +22,17 @@ class ActiveRoleController extends Controller
         // Security check: Only allow switching to roles the user actually has
         if ($user->hasRole($roleToSwitch)) {
             session(['active_role' => $roleToSwitch]);
-            return redirect()->route('dashboard')->with('success', "Active role switched to {$roleToSwitch}.");
+
+            // Determine target route based on role
+            $routeName = match ($roleToSwitch) {
+                'admin' => 'admin.dashboard',
+                'Dosen' => 'dosen.dashboard',
+                'Mahasiswa' => 'mahasiswa.dashboard',
+                'Kaprodi' => 'dosen.monitoring-kaprodi.index',
+                default => 'dashboard',
+            };
+
+            return redirect()->route($routeName)->with('success', "Active role switched to {$roleToSwitch}.");
         }
 
         return redirect()->back()->with('error', 'Unauthorized role switch attempt.');
