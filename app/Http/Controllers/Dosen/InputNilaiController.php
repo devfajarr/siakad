@@ -123,6 +123,10 @@ class InputNilaiController extends Controller
             })
             ->firstOrFail();
 
+        if ($kelas->is_locked) {
+            return redirect()->back()->with('error', 'Gagal menyimpan. Kelas ini telah dikunci oleh bagian Akademik.');
+        }
+
         $data = $request->validate([
             'nilai' => 'required|array',
             'nilai.*' => 'nullable|numeric|min:0|max:100',

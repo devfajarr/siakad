@@ -115,6 +115,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('kaprodi/search-dosen', [\App\Http\Controllers\Admin\KaprodiController::class, 'searchDosen'])->name('kaprodi.search-dosen');
     Route::resource('kaprodi', \App\Http\Controllers\Admin\KaprodiController::class);
 
+    // Rekapitulasi Nilai (Phase 1 & 2)
+    Route::controller(\App\Http\Controllers\Admin\RekapNilaiController::class)->prefix('rekap-nilai')->name('rekap-nilai.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/prodi/{id_prodi}', 'show')->name('show');
+        Route::post('/lock/{id_kelas}', 'toggleLock')->name('toggle-lock');
+        Route::post('/bulk-lock', 'bulkLock')->name('bulk-lock');
+        Route::get('/override/{id_kelas}', 'editNilai')->name('override');
+        Route::post('/override/{id_kelas}/store', 'storeOverride')->name('override.store');
+        Route::post('/ajax-convert', 'convert')->name('ajax-convert');
+    });
+
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {

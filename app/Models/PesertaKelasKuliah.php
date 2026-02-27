@@ -39,6 +39,9 @@ class PesertaKelasKuliah extends Model
         'status_krs',
         'acc_by',
         'last_acc_at',
+        'sync_action',
+        'is_local_change',
+        'is_deleted_local',
     ];
 
     protected $casts = [
@@ -46,6 +49,8 @@ class PesertaKelasKuliah extends Model
         'nilai_akhir' => 'decimal:2',
         'nilai_indeks' => 'decimal:2',
         'is_deleted_server' => 'boolean',
+        'is_local_change' => 'boolean',
+        'is_deleted_local' => 'boolean',
         'last_synced_at' => 'datetime',
         'last_push_at' => 'datetime',
         'last_acc_at' => 'datetime',

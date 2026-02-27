@@ -63,6 +63,8 @@ class KelasKuliah extends Model
         'sync_action',
         'is_local_change',
         'is_deleted_local',
+        'is_locked',
+        'locked_at',
     ];
 
     protected $casts = [
@@ -79,6 +81,8 @@ class KelasKuliah extends Model
         'is_deleted_local' => 'boolean',
         'last_synced_at' => 'datetime',
         'last_push_at' => 'datetime',
+        'is_locked' => 'boolean',
+        'locked_at' => 'datetime',
         'tanggal_mulai_efektif' => 'date',
         'tanggal_akhir_efektif' => 'date',
     ];

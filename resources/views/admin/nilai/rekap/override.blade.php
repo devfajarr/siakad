@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Input Nilai - ' . $kelas->mataKuliah->nama_mata_kuliah)
+@section('title', 'Override Nilai - ' . ($kelas->mataKuliah->nama_mk ?? 'Matakuliah'))
 
 @push('styles')
     <style>
@@ -19,32 +19,30 @@
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="d-flex justify-content-between align-items-center py-3 mb-4">
             <h4 class="fw-bold mb-0">
-                <span class="text-muted fw-light">Input Nilai /</span> {{ $kelas->mataKuliah->nama_mk }}
+                <span class="text-muted fw-light">Rekapitulasi Nilai /</span> Override Nilai
             </h4>
-            <a href="{{ route('dosen.nilai.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('admin.rekap-nilai.show', $kelas->id_prodi) }}" class="btn btn-outline-secondary">
                 <i class="ri-arrow-left-line me-1"></i> Kembali
             </a>
         </div>
 
-        <!-- Info Kelas -->
-        <div class="card mb-4">
+        <!-- Info Kelas & Status Lock -->
+        <div class="card mb-4 border-start border-primary border-3">
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
                         <table class="table table-borderless table-sm">
                             <tr>
                                 <th width="150">Mata Kuliah</th>
-                                <td>: {{ $kelas->mataKuliah->kode_mk }} -
-                                    {{ $kelas->mataKuliah->nama_mk }}
-                                </td>
+                                <td>: {{ $kelas->mataKuliah->kode_mk ?? '-' }} - {{ $kelas->mataKuliah->nama_mk ?? 'Tidak Ditemukan' }}</td>
                             </tr>
                             <tr>
                                 <th>Kelas</th>
                                 <td>: {{ $kelas->nama_kelas_kuliah }}</td>
                             </tr>
                             <tr>
-                                <th>Program Studi</th>
-                                <td>: {{ $kelas->programStudi->nama_program_studi }}</td>
+                                <th>Status Otoritas</th>
+                                <td>: <span class="badge bg-label-primary">ADMIN OVERRIDE</span></td>
                             </tr>
                         </table>
                     </div>
@@ -55,12 +53,15 @@
                                 <td>: {{ $kelas->semester->nama_semester }}</td>
                             </tr>
                             <tr>
-                                <th>Dosen Pengampu</th>
-                                <td>: {{ auth()->user()->dosen->nama_tampilan }}</td>
-                            </tr>
-                            <tr>
-                                <th>Jumlah Mhs</th>
-                                <td>: {{ $peserta->count() }} Mahasiswa</td>
+                                <th>Status Lock</th>
+                                <td>: 
+                                    @if($kelas->is_locked)
+                                        <span class="badge bg-danger"><i class="ri-lock-2-line me-1"></i> LOCKED</span>
+                                        <small class="text-muted d-block ms-2">Dikunci pada: {{ $row->locked_at ?? '-' }}</small>
+                                    @else
+                                        <span class="badge bg-success"><i class="ri-lock-unlock-line me-1"></i> OPEN</span>
+                                    @endif
+                                </td>
                             </tr>
                         </table>
                     </div>
@@ -68,24 +69,24 @@
             </div>
         </div>
 
-        <!-- Form Input Nilai -->
-        <form action="{{ route('dosen.nilai.store', $kelas->id_kelas_kuliah) }}" method="POST">
+        <!-- Form Override Nilai -->
+        <form action="{{ route('admin.rekap-nilai.override.store', $kelas->id_kelas_kuliah) }}" method="POST">
             @csrf
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Daftar Mahasiswa</h5>
-                    @if ($kelas->is_locked)
-                        <div class="alert alert-danger py-2 px-3 mb-0">
-                            <i class="ri-lock-2-line me-1"></i>
-                            <strong>Nilai Telah Dikunci.</strong> Anda tidak dapat mengubah nilai lagi.
-                        </div>
-                    @else
-                        <button type="submit" class="btn btn-primary">
-                            <i class="ri-save-line me-1"></i> Simpan Nilai
-                        </button>
-                    @endif
+                    <h5 class="mb-0">Daftar Mahasiswa (Override Mode)</h5>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="ri-shield-user-line me-1"></i> Simpan Perubahan (Override)
+                    </button>
                 </div>
                 <div class="card-body">
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="ri-error-warning-line me-2 fs-4"></i>
+                        <div>
+                            <strong>Perhatian Admin:</strong> Setiap perubahan nilai yang dilakukan di halaman ini akan dicatat dalam Log Audit Trail sistem.
+                        </div>
+                    </div>
+
                     <div class="table-responsive text-nowrap">
                         <table class="table table-bordered" id="tableMahasiswa">
                             <thead class="table-light">
@@ -101,7 +102,7 @@
                             <tbody>
                                 @foreach ($peserta as $index => $row)
                                     @php
-                                        $isFailed = $row->nilai_indeks !== null && $row->nilai_indeks < 2.0; // Misal < 2.0 (C) dianggap merah
+                                        $isFailed = $row->nilai_indeks !== null && $row->nilai_indeks < 2.0;
                                     @endphp
                                     <tr class="{{ $isFailed ? 'table-danger-custom' : '' }}">
                                         <td class="text-center">{{ $index + 1 }}</td>
@@ -112,8 +113,7 @@
                                                 name="nilai[{{ $row->id }}]" value="{{ $row->nilai_angka }}"
                                                 class="form-control form-control-sm input-nilai numeric-input"
                                                 data-peserta-id="{{ $row->id }}"
-                                                data-id-prodi="{{ $row->riwayatPendidikan->id_prodi ?? $kelas->id_prodi }}"
-                                                {{ $kelas->is_locked ? 'disabled' : '' }}>
+                                                data-id-prodi="{{ $row->riwayatPendidikan->id_prodi ?? $kelas->id_prodi }}">
                                         </td>
                                         <td class="text-center">
                                             <span id="huruf-{{ $row->id }}" class="fw-bold fs-5">
@@ -139,7 +139,7 @@
 @push('scripts')
     <script>
         $(function () {
-            const ajaxUrl = "{{ route('dosen.nilai.ajax-convert') }}";
+            const ajaxUrl = "{{ route('admin.rekap-nilai.ajax-convert') }}";
             let timeout = null;
 
             $('.input-nilai').on('input', function () {
@@ -149,10 +149,8 @@
                 const prodiId = input.data('id-prodi');
                 const tr = input.closest('tr');
 
-                // Clear previous timeout
                 clearTimeout(timeout);
 
-                // Basic validation
                 if (val === '' || isNaN(val)) {
                     $(`#huruf-${pesertaId}`).text('-');
                     $(`#indeks-${pesertaId}`).text('0.00');
@@ -167,7 +165,6 @@
                     input.removeClass('is-invalid');
                 }
 
-                // Debounce AJAX call
                 timeout = setTimeout(function () {
                     $.ajax({
                         url: ajaxUrl,
@@ -181,18 +178,14 @@
                             $(`#huruf-${pesertaId}`).text(res.nilai_huruf);
                             $(`#indeks-${pesertaId}`).text(parseFloat(res.nilai_indeks).toFixed(2));
 
-                            // Visual Feedback for failed
                             if (parseFloat(res.nilai_indeks) < 2.0) {
                                 tr.addClass('table-danger-custom');
                             } else {
                                 tr.removeClass('table-danger-custom');
                             }
-                        },
-                        error: function () {
-                            console.error('Gagal mengambil data konversi nilai');
                         }
                     });
-                }, 400); // 400ms debounce
+                }, 400);
             });
         });
     </script>

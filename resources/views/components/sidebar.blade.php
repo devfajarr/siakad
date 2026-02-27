@@ -109,6 +109,12 @@
                     <div data-i18n="Monitoring Perkuliahan">Monitoring Perkuliahan</div>
                 </a>
             </li>
+            <li class="menu-item {{ request()->routeIs('admin.rekap-nilai.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.rekap-nilai.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-file-list-3-line"></i>
+                    <div data-i18n="Rekapitulasi Nilai">Rekapitulasi Nilai</div>
+                </a>
+            </li>
 
             <!-- Manajemen Jabatan -->
             <li class="menu-header mt-5 small text-uppercase">
