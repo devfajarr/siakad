@@ -186,6 +186,14 @@ Route::middleware(['auth', 'role:Dosen'])->prefix('dosen')->name('dosen.')->grou
         Route::get('/', [\App\Http\Controllers\Dosen\Kaprodi\MonitoringController::class, 'index'])->name('index');
         Route::get('/kelas/{id}', [\App\Http\Controllers\Dosen\Kaprodi\MonitoringController::class, 'show'])->name('show');
     });
+
+    // Input Nilai Mahasiswa
+    Route::prefix('nilai')->name('nilai.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Dosen\InputNilaiController::class, 'index'])->name('index');
+        Route::get('/{id}', [\App\Http\Controllers\Dosen\InputNilaiController::class, 'show'])->name('show');
+        Route::post('/{id}/store', [\App\Http\Controllers\Dosen\InputNilaiController::class, 'store'])->name('store');
+        Route::post('/ajax-convert', [\App\Http\Controllers\Dosen\InputNilaiController::class, 'convert'])->name('ajax-convert');
+    });
 });
 
 

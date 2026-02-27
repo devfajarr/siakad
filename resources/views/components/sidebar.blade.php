@@ -205,8 +205,8 @@
                     <div data-i18n="Jadwal Mengajar">Jadwal Mengajar</div>
                 </a>
             </li>
-            <li class="menu-item">
-                <a href="#" class="menu-link">
+            <li class="menu-item {{ request()->routeIs('dosen.nilai.*') ? 'active' : '' }}">
+                <a href="{{ route('dosen.nilai.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-edit-box-line"></i>
                     <div data-i18n="Input Nilai Mahasiswa">Input Nilai Mahasiswa</div>
                 </a>

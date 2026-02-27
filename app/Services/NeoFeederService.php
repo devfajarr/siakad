@@ -66,4 +66,12 @@ class NeoFeederService
 
         return $json['data'] ?? [];
     }
+
+    /**
+     * Public wrapper for sendRequest.
+     */
+    public function execute(string $act, array $params = [])
+    {
+        return $this->sendRequest($act, $params);
+    }
 }
