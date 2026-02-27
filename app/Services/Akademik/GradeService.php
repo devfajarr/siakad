@@ -42,4 +42,43 @@ class GradeService
             'nilai_indeks' => $skala->nilai_indeks,
         ];
     }
+
+    /**
+     * Hitung nilai akhir berdasarkan komponen nilai.
+     * 
+     * @param array $components [tugas1...5, aktif, etika, uts, uas]
+     * @param int $totalHadir Jumlah kehadiran mahasiswa
+     * @param int $targetPertemuan Target pertemuan (default: 14)
+     * @return float
+     */
+    public function calculateFinalScore(array $components, int $totalHadir, int $targetPertemuan = 14): float
+    {
+        $targetPertemuan = $targetPertemuan > 0 ? $targetPertemuan : 14;
+
+        // 1. Rata-rata Tugas (25%)
+        $tugas = [
+            $components['tugas1'] ?? 0,
+            $components['tugas2'] ?? 0,
+            $components['tugas3'] ?? 0,
+            $components['tugas4'] ?? 0,
+            $components['tugas5'] ?? 0,
+        ];
+        $avgTugas = count($tugas) > 0 ? array_sum($tugas) / count($tugas) : 0;
+        $scoreTugas = $avgTugas * 0.25;
+
+        // 2. Aktif & Etika (Masing-masing 5%)
+        $scoreAktif = ($components['aktif'] ?? 0) * 0.05;
+        $scoreEtika = ($components['etika'] ?? 0) * 0.05;
+
+        // 3. Presensi (15%)
+        $scorePresensi = ($totalHadir / $targetPertemuan) * 15;
+        // Cap di 15 jika kehadiran > target (ekstra)
+        $scorePresensi = min($scorePresensi, 15);
+
+        // 4. UTS & UAS (Masing-masing 25%)
+        $scoreUTS = ($components['uts'] ?? 0) * 0.25;
+        $scoreUAS = ($components['uas'] ?? 0) * 0.25;
+
+        return round($scoreTugas + $scoreAktif + $scoreEtika + $scorePresensi + $scoreUTS + $scoreUAS, 2);
+    }
 }

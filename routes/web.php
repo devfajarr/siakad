@@ -126,6 +126,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::post('/ajax-convert', 'convert')->name('ajax-convert');
     });
 
+    // Centralized Sync Manager (Phase 3)
+    Route::controller(\App\Http\Controllers\Admin\SyncManagerController::class)->prefix('sync-manager')->name('sync-manager.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/dispatch', 'dispatchSync')->name('dispatch');
+        Route::get('/batch/{batchId}', 'checkBatch')->name('batch');
+    });
+
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {

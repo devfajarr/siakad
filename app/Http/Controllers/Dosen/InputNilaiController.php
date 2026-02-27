@@ -79,6 +79,16 @@ class InputNilaiController extends Controller
 
         $peserta = PesertaKelasKuliah::where('id_kelas_kuliah', $id)
             ->with(['riwayatPendidikan.mahasiswa'])
+            ->withCount([
+                'riwayatPendidikan as total_hadir' => function ($q) use ($id) {
+                    $q->whereHas('presensiMahasiswas', function ($q) use ($id) {
+                        $q->where('status_kehadiran', 'H')
+                            ->whereHas('pertemuan', function ($q) use ($id) {
+                                $q->where('id_kelas_kuliah', $id);
+                            });
+                    });
+                }
+            ])
             ->get()
             ->sortBy(function ($p) {
                 return $p->riwayatPendidikan->mahasiswa->nama_mahasiswa ?? '';
@@ -128,46 +138,85 @@ class InputNilaiController extends Controller
         }
 
         $data = $request->validate([
-            'nilai' => 'required|array',
-            'nilai.*' => 'nullable|numeric|min:0|max:100',
+            'tugas1' => 'nullable|array',
+            'tugas2' => 'nullable|array',
+            'tugas3' => 'nullable|array',
+            'tugas4' => 'nullable|array',
+            'tugas5' => 'nullable|array',
+            'aktif' => 'nullable|array',
+            'etika' => 'nullable|array',
+            'uts' => 'nullable|array',
+            'uas' => 'nullable|array',
+            'tugas1.*' => 'nullable|numeric|min:0|max:100',
+            'tugas2.*' => 'nullable|numeric|min:0|max:100',
+            'tugas3.*' => 'nullable|numeric|min:0|max:100',
+            'tugas4.*' => 'nullable|numeric|min:0|max:100',
+            'tugas5.*' => 'nullable|numeric|min:0|max:100',
+            'aktif.*' => 'nullable|numeric|min:0|max:100',
+            'etika.*' => 'nullable|numeric|min:0|max:100',
+            'uts.*' => 'nullable|numeric|min:0|max:100',
+            'uas.*' => 'nullable|numeric|min:0|max:100',
         ]);
+
+        $targetPertemuan = config('academic.target_pertemuan', 14);
 
         try {
             DB::beginTransaction();
 
-            foreach ($data['nilai'] as $pesertaId => $nilaiAngka) {
-                if ($nilaiAngka === null)
-                    continue;
+            // Ambil semua ID peserta dari request untuk diproses
+            $pesertaIds = array_keys($data['uts'] ?? []); // UTS biasanya diisi paling terakhir/lengkap
 
-                $peserta = PesertaKelasKuliah::with('riwayatPendidikan')
+            foreach ($pesertaIds as $pesertaId) {
+                $peserta = PesertaKelasKuliah::with(['riwayatPendidikan'])
+                    ->withCount([
+                        'riwayatPendidikan as total_hadir' => function ($q) use ($id) {
+                            $q->whereHas('presensiMahasiswas', function ($q) use ($id) {
+                                $q->where('status_kehadiran', 'H')
+                                    ->whereHas('pertemuan', function ($q) use ($id) {
+                                        $q->where('id_kelas_kuliah', $id);
+                                    });
+                            });
+                        }
+                    ])
                     ->where('id_kelas_kuliah', $id)
                     ->where('id', $pesertaId)
                     ->first();
 
                 if ($peserta) {
-                    // Cari konversi grade (Prioritas pake Prodi Mhs buat Lintas Prodi)
+                    $components = [
+                        'tugas1' => $data['tugas1'][$pesertaId] ?? 0,
+                        'tugas2' => $data['tugas2'][$pesertaId] ?? 0,
+                        'tugas3' => $data['tugas3'][$pesertaId] ?? 0,
+                        'tugas4' => $data['tugas4'][$pesertaId] ?? 0,
+                        'tugas5' => $data['tugas5'][$pesertaId] ?? 0,
+                        'aktif' => $data['aktif'][$pesertaId] ?? 0,
+                        'etika' => $data['etika'][$pesertaId] ?? 0,
+                        'uts' => $data['uts'][$pesertaId] ?? 0,
+                        'uas' => $data['uas'][$pesertaId] ?? 0,
+                    ];
+
+                    $nilaiAngka = $this->gradeService->calculateFinalScore(
+                        $components,
+                        $peserta->total_hadir,
+                        $targetPertemuan
+                    );
+
                     $prodiId = $peserta->riwayatPendidikan->id_prodi ?? $kelas->id_prodi;
-                    $grade = $this->gradeService->convertToGrade($prodiId, (float) $nilaiAngka);
+                    $grade = $this->gradeService->convertToGrade($prodiId, $nilaiAngka);
 
                     if ($grade) {
-                        $peserta->update([
+                        $peserta->update(array_merge($components, [
                             'nilai_angka' => $nilaiAngka,
+                            'nilai_akhir' => $nilaiAngka,
                             'nilai_huruf' => $grade['nilai_huruf'],
                             'nilai_indeks' => $grade['nilai_indeks'],
                             'status_sinkronisasi' => 'updated_local',
-                        ]);
+                        ]));
 
-                        Log::info("CRUD_UPDATE: [Nilai Mahasiswa] - Berhasil update", [
-                            'peserta_id' => $pesertaId,
-                            'nama' => $peserta->riwayatPendidikan->mahasiswa->nama_mahasiswa ?? 'Unknown',
-                            'nilai' => $nilaiAngka,
-                            'huruf' => $grade['nilai_huruf']
-                        ]);
-                    } else {
-                        Log::warning("CRUD_UPDATE_FAILED: [Nilai Mahasiswa] - Gagal konversi grade", [
-                            'peserta_id' => $pesertaId,
-                            'prodi_id' => $prodiId,
-                            'nilai' => $nilaiAngka
+                        Log::info("CRUD_UPDATE: [Nilai Mahasiswa Detailed] diupdate oleh dosen", [
+                            'id' => $pesertaId,
+                            'nilai_akhir' => $nilaiAngka,
+                            'grade' => $grade['nilai_huruf']
                         ]);
                     }
                 }

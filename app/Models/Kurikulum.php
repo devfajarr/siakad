@@ -31,6 +31,14 @@ class Kurikulum extends Model
         'is_deleted_local' => 'boolean',
     ];
 
+    /**
+     * Accessor: Fallback to id_kurikulum if id_feeder is null.
+     */
+    public function getIdFeederAttribute($value)
+    {
+        return $value ?? $this->id_kurikulum;
+    }
+
     protected static function booted()
     {
         static::addGlobalScope('sync_active', function ($builder) {
@@ -60,7 +68,7 @@ class Kurikulum extends Model
     public function matakuliah()
     {
         return $this->belongsToMany(MataKuliah::class, 'matkul_kurikulums', 'id_kurikulum', 'id_matkul', 'id_kurikulum', 'id_matkul')
-            ->withPivot(['semester', 'sks_mata_kuliah', 'sks_tatap_muka', 'sks_praktek', 'sks_praktek_lapangan', 'sks_simulasi', 'apakah_wajib', 'status_sinkronisasi', 'sumber_data']);
+            ->withPivot(['semester', 'sks_mata_kuliah', 'sks_tatap_muka', 'sks_praktek', 'sks_praktek_lapangan', 'sks_simulasi', 'apakah_wajib', 'status_sinkronisasi', 'sumber_data', 'last_synced_at', 'sync_error_message', 'id_feeder']);
     }
 
     /**

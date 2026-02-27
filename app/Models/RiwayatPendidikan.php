@@ -18,7 +18,24 @@ class RiwayatPendidikan extends Model
         'sks_diakui' => 'integer',
         'is_synced' => 'boolean',
         'last_sync' => 'datetime',
+        'last_synced_at' => 'datetime',
     ];
+
+    /**
+     * Accessor: Fallback to id_riwayat_pendidikan if id_feeder is null.
+     */
+    public function getIdFeederAttribute($value)
+    {
+        return $value ?? $this->id_riwayat_pendidikan;
+    }
+
+    /**
+     * Accessor: Fallback to last_sync if last_synced_at is null.
+     */
+    public function getLastSyncedAtAttribute($value)
+    {
+        return $value ?? $this->last_sync;
+    }
 
 
     public function mahasiswa()

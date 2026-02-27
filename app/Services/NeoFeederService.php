@@ -40,7 +40,7 @@ class NeoFeederService
             // Merge dengan params tambahan
             $payload = array_merge($payload, $params);
 
-            $response = Http::timeout(30)->post($this->baseUrl, $payload);
+            $response = Http::timeout(300)->post($this->baseUrl, $payload);
 
         } catch (ConnectionException $e) {
             throw new Exception("Gagal koneksi ke Neo Feeder: " . $e->getMessage());

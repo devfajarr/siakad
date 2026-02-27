@@ -178,6 +178,12 @@
                     <div data-i18n="Manajemen Role">Manajemen Multi-Role</div>
                 </a>
             </li>
+            <li class="menu-item {{ request()->routeIs('admin.sync-manager.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.sync-manager.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-refresh-line"></i>
+                    <div data-i18n="Sync Manager">Neo Feeder Sync</div>
+                </a>
+            </li>
         @else
             <!-- Dashboard Default System (Hanya untuk non-admin) -->
             <li

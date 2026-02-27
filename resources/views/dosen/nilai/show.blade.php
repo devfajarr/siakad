@@ -4,13 +4,35 @@
 
 @push('styles')
     <style>
-        .input-nilai {
-            width: 80px;
+        .input-nilai-detail {
+            width: 65px !important;
             text-align: center;
+            padding: 0.35rem 0.2rem !important;
+            font-weight: 500;
+            border-color: #d9dee3;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .comp-tugas {
+            width: 50px !important;
+        }
+
+        .input-nilai-detail:focus {
+            border-color: #696cff !important;
+            box-shadow: 0 0 0.25rem 0.05rem rgba(105, 108, 255, 0.25) !important;
+            background-color: #f8f9ff !important;
+            transform: scale(1.05);
+            z-index: 10;
         }
 
         .table-danger-custom {
             background-color: #ffeef0 !important;
+        }
+
+        /* Group column for T1-5 */
+        .col-tugas-group {
+            min-width: 280px !important;
+            background-color: #fbfbff;
         }
     </style>
 @endpush
@@ -91,38 +113,83 @@
                             <thead class="table-light">
                                 <tr>
                                     <th width="50" class="text-center">No</th>
-                                    <th width="150">NIM</th>
                                     <th>Nama Mahasiswa</th>
-                                    <th width="120" class="text-center">Nilai Angka</th>
-                                    <th width="100" class="text-center">Nilai Huruf</th>
-                                    <th width="100" class="text-center">Indeks</th>
+                                    <th class="text-center col-tugas-group" title="Tugas 1-5 (25%)">Tugas 1-5 (25%)</th>
+                                    <th class="text-center" title="Aktif (5%)">Akt</th>
+                                    <th class="text-center" title="Etika (5%)">Etk</th>
+                                    <th class="text-center" title="Presensi (15%)">Psn</th>
+                                    <th class="text-center" title="UTS (25%)">UTS</th>
+                                    <th class="text-center" title="UAS (25%)">UAS</th>
+                                    <th width="120" class="text-center">Nilai Akhir</th>
+                                    <th width="80" class="text-center">Grade</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($peserta as $index => $row)
                                     @php
-                                        $isFailed = $row->nilai_indeks !== null && $row->nilai_indeks < 2.0; // Misal < 2.0 (C) dianggap merah
+                                        $isFailed = $row->nilai_indeks !== null && $row->nilai_indeks < 2.0;
+                                        $targetPertemuan = config('academic.target_pertemuan', 14);
                                     @endphp
-                                    <tr class="{{ $isFailed ? 'table-danger-custom' : '' }}">
+                                    <tr class="{{ $isFailed ? 'table-danger-custom' : '' }}" data-peserta-id="{{ $row->id }}">
                                         <td class="text-center">{{ $index + 1 }}</td>
-                                        <td>{{ $row->riwayatPendidikan->nim ?? '-' }}</td>
-                                        <td>{{ $row->riwayatPendidikan->mahasiswa->nama_mahasiswa ?? '-' }}</td>
+                                        <td>
+                                            <div class="fw-bold">{{ $row->riwayatPendidikan->mahasiswa->nama_mahasiswa ?? '-' }}</div>
+                                            <small class="text-muted">{{ $row->riwayatPendidikan->nim ?? '-' }}</small>
+                                        </td>
+                                        <!-- Tugas 1-5 -->
+                                        <td class="text-center d-flex gap-1 justify-content-center p-1 col-tugas-group">
+                                            @for($i=1; $i<=5; $i++)
+                                                <input type="number" step="0.01" min="0" max="100"
+                                                    name="tugas{{$i}}[{{ $row->id }}]" value="{{ $row->{'tugas'.$i} ?: 0 }}"
+                                                    class="form-control form-control-sm input-nilai-detail comp-tugas"
+                                                    data-comp="t{{$i}}"
+                                                    {{ $kelas->is_locked ? 'disabled' : '' }}>
+                                            @endfor
+                                        </td>
+                                        <!-- Aktif & Etika -->
                                         <td class="text-center">
                                             <input type="number" step="0.01" min="0" max="100"
-                                                name="nilai[{{ $row->id }}]" value="{{ $row->nilai_angka }}"
-                                                class="form-control form-control-sm input-nilai numeric-input"
-                                                data-peserta-id="{{ $row->id }}"
-                                                data-id-prodi="{{ $row->riwayatPendidikan->id_prodi ?? $kelas->id_prodi }}"
+                                                name="aktif[{{ $row->id }}]" value="{{ $row->aktif ?: 0 }}"
+                                                class="form-control form-control-sm input-nilai-detail comp-aktif"
                                                 {{ $kelas->is_locked ? 'disabled' : '' }}>
                                         </td>
                                         <td class="text-center">
-                                            <span id="huruf-{{ $row->id }}" class="fw-bold fs-5">
-                                                {{ $row->nilai_huruf ?: '-' }}
+                                            <input type="number" step="0.01" min="0" max="100"
+                                                name="etika[{{ $row->id }}]" value="{{ $row->etika ?: 0 }}"
+                                                class="form-control form-control-sm input-nilai-detail comp-etika"
+                                                {{ $kelas->is_locked ? 'disabled' : '' }}>
+                                        </td>
+                                        <!-- Presensi (Read Only calculated from total_hadir) -->
+                                        <td class="text-center">
+                                            <div class="presensi-score fw-bold" 
+                                                 data-hadir="{{ $row->total_hadir }}" 
+                                                 data-target="{{ $targetPertemuan }}">
+                                                {{ round(($row->total_hadir / $targetPertemuan) * 15, 2) }}
+                                            </div>
+                                            <small class="text-muted">{{ $row->total_hadir }}/{{ $targetPertemuan }}</small>
+                                        </td>
+                                        <!-- UTS & UAS -->
+                                        <td class="text-center">
+                                            <input type="number" step="0.01" min="0" max="100"
+                                                name="uts[{{ $row->id }}]" value="{{ $row->uts ?: 0 }}"
+                                                class="form-control form-control-sm input-nilai-detail comp-uts"
+                                                {{ $kelas->is_locked ? 'disabled' : '' }}>
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="number" step="0.01" min="0" max="100"
+                                                name="uas[{{ $row->id }}]" value="{{ $row->uas ?: 0 }}"
+                                                class="form-control form-control-sm input-nilai-detail comp-uas"
+                                                {{ $kelas->is_locked ? 'disabled' : '' }}>
+                                        </td>
+                                        <!-- Result -->
+                                        <td class="text-center">
+                                            <span id="akhir-{{ $row->id }}" class="fw-bold fs-5 text-primary">
+                                                {{ number_format($row->nilai_angka, 2) }}
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span id="indeks-{{ $row->id }}">
-                                                {{ $row->nilai_indeks !== null ? number_format($row->nilai_indeks, 2) : '0.00' }}
+                                            <span id="huruf-{{ $row->id }}" class="badge bg-label-dark p-2">
+                                                {{ $row->nilai_huruf ?: '-' }}
                                             </span>
                                         </td>
                                     </tr>
@@ -142,57 +209,64 @@
             const ajaxUrl = "{{ route('dosen.nilai.ajax-convert') }}";
             let timeout = null;
 
-            $('.input-nilai').on('input', function () {
-                const input = $(this);
-                const val = input.val();
-                const pesertaId = input.data('peserta-id');
-                const prodiId = input.data('id-prodi');
-                const tr = input.closest('tr');
+            function calculateRow(tr) {
+                const pesertaId = tr.data('peserta-id');
+                
+                // 1. Tugas (25%) - Rata-rata 5 tugas
+                let sumTugas = 0;
+                tr.find('.comp-tugas').each(function() {
+                    sumTugas += parseFloat($(this).val()) || 0;
+                });
+                const avgTugas = sumTugas / 5;
+                const scoreTugas = avgTugas * 0.25;
 
-                // Clear previous timeout
+                // 2. Aktif (5%) & Etika (5%)
+                const scoreAktif = (parseFloat(tr.find('.comp-aktif').val()) || 0) * 0.05;
+                const scoreEtika = (parseFloat(tr.find('.comp-etika').val()) || 0) * 0.05;
+
+                // 3. Presensi (15%)
+                const presensiDiv = tr.find('.presensi-score');
+                const hadir = parseFloat(presensiDiv.data('hadir')) || 0;
+                const target = parseFloat(presensiDiv.data('target')) || 14;
+                const scorePresensi = Math.min((hadir / target) * 15, 15);
+
+                // 4. UTS (25%) & UAS (25%)
+                const scoreUTS = (parseFloat(tr.find('.comp-uts').val()) || 0) * 0.25;
+                const scoreUAS = (parseFloat(tr.find('.comp-uas').val()) || 0) * 0.25;
+
+                // Total
+                const total = scoreTugas + scoreAktif + scoreEtika + scorePresensi + scoreUTS + scoreUAS;
+                const finalScore = Math.round(total * 100) / 100;
+
+                tr.find(`#akhir-${pesertaId}`).text(finalScore.toFixed(2));
+
+                // AJAX untuk Grade Huruf
                 clearTimeout(timeout);
-
-                // Basic validation
-                if (val === '' || isNaN(val)) {
-                    $(`#huruf-${pesertaId}`).text('-');
-                    $(`#indeks-${pesertaId}`).text('0.00');
-                    tr.removeClass('table-danger-custom');
-                    return;
-                }
-
-                if (val < 0 || val > 100) {
-                    input.addClass('is-invalid');
-                    return;
-                } else {
-                    input.removeClass('is-invalid');
-                }
-
-                // Debounce AJAX call
                 timeout = setTimeout(function () {
                     $.ajax({
                         url: ajaxUrl,
                         method: 'POST',
                         data: {
                             _token: "{{ csrf_token() }}",
-                            nilai_angka: val,
-                            id_prodi: prodiId
+                            nilai_angka: finalScore,
+                            id_prodi: tr.find('.input-nilai-detail').first().closest('tr').find('.comp-tugas').first().attr('name') ? 
+                                     "{{ $kelas->id_prodi }}" : "{{ $kelas->id_prodi }}" // Fallback logic
                         },
                         success: function (res) {
                             $(`#huruf-${pesertaId}`).text(res.nilai_huruf);
-                            $(`#indeks-${pesertaId}`).text(parseFloat(res.nilai_indeks).toFixed(2));
-
-                            // Visual Feedback for failed
+                            
                             if (parseFloat(res.nilai_indeks) < 2.0) {
                                 tr.addClass('table-danger-custom');
                             } else {
                                 tr.removeClass('table-danger-custom');
                             }
-                        },
-                        error: function () {
-                            console.error('Gagal mengambil data konversi nilai');
                         }
                     });
-                }, 400); // 400ms debounce
+                }, 500);
+            }
+
+            $('.input-nilai-detail').on('input', function () {
+                calculateRow($(this).closest('tr'));
             });
         });
     </script>

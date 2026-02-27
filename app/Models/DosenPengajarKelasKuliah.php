@@ -37,6 +37,7 @@ class DosenPengajarKelasKuliah extends Model
 
     protected $fillable = [
         'id_aktivitas_mengajar',
+        'id_feeder',
         'id_kelas_kuliah',
         'id_dosen',
         'id_registrasi_dosen',
@@ -62,6 +63,14 @@ class DosenPengajarKelasKuliah extends Model
         'last_push_at',
         'sync_error_message',
     ];
+
+    /**
+     * Accessor: Fallback to id_aktivitas_mengajar if id_feeder is null.
+     */
+    public function getIdFeederAttribute($value)
+    {
+        return $value ?? $this->id_aktivitas_mengajar;
+    }
 
     protected $casts = [
         'sks_substansi' => 'decimal:2',

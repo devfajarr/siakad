@@ -27,6 +27,9 @@ class Mahasiswa extends Model
         'id_prodi',
         'user_id',
         'bypass_krs_until',
+        'status_sinkronisasi',
+        'last_synced_at',
+        'sync_error_message',
     ];
 
     public function user()
@@ -39,11 +42,20 @@ class Mahasiswa extends Model
         'penerima_kps' => 'boolean',
         'is_synced' => 'boolean',
         'last_sync' => 'datetime',
+        'last_synced_at' => 'datetime',
         'tgl_lahir_ayah' => 'date',
         'tgl_lahir_ibu' => 'date',
         'tgl_lahir_wali' => 'date',
         'bypass_krs_until' => 'datetime',
     ];
+
+    /**
+     * Accessor: Fallback to last_sync if last_synced_at is null.
+     */
+    public function getLastSyncedAtAttribute($value)
+    {
+        return $value ?? $this->last_sync;
+    }
 
     /**
      * Mutator: Ensure email is lowercase.

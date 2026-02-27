@@ -123,6 +123,16 @@ class RekapNilaiController extends Controller
 
         $peserta = PesertaKelasKuliah::where('id_kelas_kuliah', $id_kelas)
             ->with(['riwayatPendidikan.mahasiswa'])
+            ->withCount([
+                'riwayatPendidikan as total_hadir' => function ($q) use ($id_kelas) {
+                    $q->whereHas('presensiMahasiswas', function ($q) use ($id_kelas) {
+                        $q->where('status_kehadiran', 'H')
+                            ->whereHas('pertemuan', function ($q) use ($id_kelas) {
+                                $q->where('id_kelas_kuliah', $id_kelas);
+                            });
+                    });
+                }
+            ])
             ->get()
             ->sortBy(function ($p) {
                 return $p->riwayatPendidikan->mahasiswa->nama_mahasiswa ?? '';
@@ -140,42 +150,88 @@ class RekapNilaiController extends Controller
         $adminName = auth()->user()->name ?? 'Administrator';
 
         $data = $request->validate([
-            'nilai' => 'required|array',
-            'nilai.*' => 'nullable|numeric|min:0|max:100',
+            'tugas1' => 'nullable|array',
+            'tugas2' => 'nullable|array',
+            'tugas3' => 'nullable|array',
+            'tugas4' => 'nullable|array',
+            'tugas5' => 'nullable|array',
+            'aktif' => 'nullable|array',
+            'etika' => 'nullable|array',
+            'uts' => 'nullable|array',
+            'uas' => 'nullable|array',
+            'tugas1.*' => 'nullable|numeric|min:0|max:100',
+            'tugas2.*' => 'nullable|numeric|min:0|max:100',
+            'tugas3.*' => 'nullable|numeric|min:0|max:100',
+            'tugas4.*' => 'nullable|numeric|min:0|max:100',
+            'tugas5.*' => 'nullable|numeric|min:0|max:100',
+            'aktif.*' => 'nullable|numeric|min:0|max:100',
+            'etika.*' => 'nullable|numeric|min:0|max:100',
+            'uts.*' => 'nullable|numeric|min:0|max:100',
+            'uas.*' => 'nullable|numeric|min:0|max:100',
         ]);
+
+        $targetPertemuan = config('academic.target_pertemuan', 14);
 
         try {
             DB::beginTransaction();
 
-            foreach ($data['nilai'] as $pesertaId => $nilaiAngka) {
-                if ($nilaiAngka === null)
-                    continue;
+            // Ambil semua ID peserta dari request (UTS sebagai anchor)
+            $pesertaIds = array_keys($data['uts'] ?? []);
 
+            foreach ($pesertaIds as $pesertaId) {
                 $peserta = PesertaKelasKuliah::with(['riwayatPendidikan.mahasiswa'])
+                    ->withCount([
+                        'riwayatPendidikan as total_hadir' => function ($q) use ($id_kelas) {
+                            $q->whereHas('presensiMahasiswas', function ($q) use ($id_kelas) {
+                                $q->where('status_kehadiran', 'H')
+                                    ->whereHas('pertemuan', function ($q) use ($id_kelas) {
+                                        $q->where('id_kelas_kuliah', $id_kelas);
+                                    });
+                            });
+                        }
+                    ])
                     ->where('id_kelas_kuliah', $id_kelas)
                     ->where('id', $pesertaId)
                     ->first();
 
                 if ($peserta) {
+                    $components = [
+                        'tugas1' => $data['tugas1'][$pesertaId] ?? 0,
+                        'tugas2' => $data['tugas2'][$pesertaId] ?? 0,
+                        'tugas3' => $data['tugas3'][$pesertaId] ?? 0,
+                        'tugas4' => $data['tugas4'][$pesertaId] ?? 0,
+                        'tugas5' => $data['tugas5'][$pesertaId] ?? 0,
+                        'aktif' => $data['aktif'][$pesertaId] ?? 0,
+                        'etika' => $data['etika'][$pesertaId] ?? 0,
+                        'uts' => $data['uts'][$pesertaId] ?? 0,
+                        'uas' => $data['uas'][$pesertaId] ?? 0,
+                    ];
+
+                    $nilaiAngka = $this->gradeService->calculateFinalScore(
+                        $components,
+                        $peserta->total_hadir,
+                        $targetPertemuan
+                    );
+
                     $oldNilai = $peserta->nilai_angka ?? 'N/A';
                     $prodiId = $peserta->riwayatPendidikan->id_prodi ?? $kelas->id_prodi;
                     $grade = $this->gradeService->convertToGrade($prodiId, (float) $nilaiAngka);
 
                     if ($grade) {
-                        $peserta->update([
+                        $peserta->update(array_merge($components, [
                             'nilai_angka' => $nilaiAngka,
-                            'nilai_akhir' => $nilaiAngka, // Update nilai_akhir also
+                            'nilai_akhir' => $nilaiAngka,
                             'nilai_huruf' => $grade['nilai_huruf'],
                             'nilai_indeks' => $grade['nilai_indeks'],
                             'status_sinkronisasi' => 'updated_local',
                             'is_local_change' => true,
                             'sync_action' => $peserta->external_id ? 'update' : 'insert'
-                        ]);
+                        ]));
 
                         // Cek apakah ada perubahan nilai untuk logging audit trail
                         if ((float) $oldNilai != (float) $nilaiAngka) {
                             $nim = $peserta->riwayatPendidikan->nim ?? 'Unknown NIM';
-                            Log::info("[OVERRIDE_NILAI] - Nilai Mahasiswa {$nim} diubah oleh Admin {$adminName}. Nilai Lama: {$oldNilai}, Nilai Baru: {$nilaiAngka}", [
+                            Log::info("[OVERRIDE_NILAI_DETAILED] - Nilai Mahasiswa {$nim} diubah oleh Admin {$adminName}. Nilai Baru: {$nilaiAngka}", [
                                 'admin_id' => auth()->id(),
                                 'peserta_id' => $pesertaId,
                                 'kelas_id' => $id_kelas

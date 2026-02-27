@@ -24,11 +24,22 @@ class PesertaKelasKuliah extends Model
     protected $fillable = [
         'id_kelas_kuliah',
         'id_registrasi_mahasiswa',
+        'id_feeder',
         'riwayat_pendidikan_id',
         'nilai_angka',
         'nilai_akhir',
         'nilai_huruf',
         'nilai_indeks',
+        // Komponen Nilai
+        'tugas1',
+        'tugas2',
+        'tugas3',
+        'tugas4',
+        'tugas5',
+        'aktif',
+        'etika',
+        'uts',
+        'uas',
         // Monitoring
         'sumber_data',
         'status_sinkronisasi',
@@ -44,10 +55,27 @@ class PesertaKelasKuliah extends Model
         'is_deleted_local',
     ];
 
+    /**
+     * Accessor: Fallback to external_id if id_feeder is null.
+     */
+    public function getIdFeederAttribute($value)
+    {
+        return $value ?? $this->external_id;
+    }
+
     protected $casts = [
         'nilai_angka' => 'decimal:2',
         'nilai_akhir' => 'decimal:2',
         'nilai_indeks' => 'decimal:2',
+        'tugas1' => 'decimal:2',
+        'tugas2' => 'decimal:2',
+        'tugas3' => 'decimal:2',
+        'tugas4' => 'decimal:2',
+        'tugas5' => 'decimal:2',
+        'aktif' => 'decimal:2',
+        'etika' => 'decimal:2',
+        'uts' => 'decimal:2',
+        'uas' => 'decimal:2',
         'is_deleted_server' => 'boolean',
         'is_local_change' => 'boolean',
         'is_deleted_local' => 'boolean',

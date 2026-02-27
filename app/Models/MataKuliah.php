@@ -19,11 +19,12 @@ class MataKuliah extends Model
     public function kurikulum()
     {
         return $this->belongsToMany(Kurikulum::class, 'matkul_kurikulums', 'id_matkul', 'id_kurikulum', 'id_matkul', 'id_kurikulum')
-            ->withPivot(['semester', 'sks_mata_kuliah', 'apakah_wajib']);
+            ->withPivot(['semester', 'sks_mata_kuliah', 'apakah_wajib', 'status_sinkronisasi', 'sumber_data', 'last_synced_at', 'sync_error_message', 'id_feeder']);
     }
 
     protected $fillable = [
         'id_matkul',
+        'id_feeder',
         'id_prodi',
         'kode_mk',
         'nama_mk',
@@ -82,6 +83,14 @@ class MataKuliah extends Model
     const STATUS_PENDING_PUSH = 'pending_push';
     const STATUS_PUSH_SUCCESS = 'push_success';
     const STATUS_PUSH_FAILED = 'push_failed';
+
+    /**
+     * Accessor: Fallback to id_matkul if id_feeder is null.
+     */
+    public function getIdFeederAttribute($value)
+    {
+        return $value ?? $this->id_matkul;
+    }
 
     /**
      * Scope a query to only include active mata kuliah.

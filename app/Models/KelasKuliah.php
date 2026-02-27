@@ -34,6 +34,7 @@ class KelasKuliah extends Model
 
     protected $fillable = [
         'id_kelas_kuliah',
+        'id_feeder',
         'id_prodi',
         'id_semester',
         'id_matkul',
@@ -66,6 +67,14 @@ class KelasKuliah extends Model
         'is_locked',
         'locked_at',
     ];
+
+    /**
+     * Accessor: Fallback to id_kelas_kuliah if id_feeder is null.
+     */
+    public function getIdFeederAttribute($value)
+    {
+        return $value ?? $this->id_kelas_kuliah;
+    }
 
     protected $casts = [
         'sks_mk' => 'decimal:2',
