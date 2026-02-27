@@ -35,29 +35,64 @@ class FeederSyncService
         $jobClass = $this->getJobClass($entity);
         $act = $this->getFeederAction($entity);
 
-        Log::info("SYNC_PULL: Mulai tarik data [{$entity}]", ['filters' => $filters]);
+        Log::info("SYNC_PULL: Mulai tarik data [{$entity}] (Paginated Fetching)", ['filters' => $filters]);
 
-        // 1. Fetch data from Feeder
-        $data = $this->feederService->execute($act, [
-            'filter' => $this->buildFilterString($filters),
-            'limit' => 0 // Fetch all for batching
-        ]);
+        // Fix: Untunk Nilai, jika tidak ada filter 'all', gunakan semester aktif agar tidak timeout
+        if ($entity === 'Nilai' && empty($filters['id_semester']) && empty($filters['all'])) {
+            $activeSemId = getActiveSemesterId();
+            if ($activeSemId) {
+                $filters['id_semester'] = $activeSemId;
+                Log::info("SYNC_PULL: Menggunakan filter semester aktif untuk Nilai: {$activeSemId}");
+            }
+        }
 
-        if (empty($data)) {
+        // Remove 'all' flag before sending to buildFilterString
+        unset($filters['all']);
+
+        $allJobs = [];
+        $offset = 0;
+        $fetchLimit = ($entity === 'Nilai') ? 500 : 1000; // Nilai lebih berat, kurangi limit per request
+
+        try {
+            while (true) {
+                Log::debug("SYNC_PULL_PAGE: Menarik data [{$entity}] - Offset: {$offset}");
+
+                $data = $this->feederService->execute($act, [
+                    'filter' => $this->buildFilterString($filters),
+                    'limit' => $fetchLimit,
+                    'offset' => $offset
+                ]);
+
+                if (empty($data))
+                    break;
+
+                // 2. Chunk data yang baru ditarik and create jobs
+                $chunks = array_chunk($data, $this->chunkSize);
+                foreach ($chunks as $chunk) {
+                    $allJobs[] = new $jobClass($chunk);
+                }
+
+                $offset += $fetchLimit;
+
+                // Jika data yang diterima kurang dari limit, artinya sudah habis
+                if (count($data) < $fetchLimit)
+                    break;
+            }
+        } catch (Exception $e) {
+            Log::error("SYNC_PULL_FAILED: Gagal menarik data [{$entity}] dari Feeder", [
+                'offset' => $offset,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+
+        if (empty($allJobs)) {
             Log::info("SYNC_PULL: Tidak ada data [{$entity}] untuk ditarik.");
             return 'empty';
         }
 
-        // 2. Chunk data and create jobs
-        $chunks = array_chunk($data, $this->chunkSize);
-        $jobs = [];
-
-        foreach ($chunks as $chunk) {
-            $jobs[] = new $jobClass($chunk);
-        }
-
         // 3. Dispatch Batch
-        $batch = Bus::batch($jobs)
+        $batch = Bus::batch($allJobs)
             ->name("Sync {$entity}")
             ->then(function ($batch) use ($entity) {
                 Log::info("SYNC_SUCCESS: Sinkronisasi [{$entity}] selesai.");
@@ -97,7 +132,7 @@ class FeederSyncService
             'KelasKuliah' => 'GetListKelasKuliah',
             'DosenPengajar' => 'GetDosenPengajarKelasKuliah',
             'PesertaKelas' => 'GetPesertaKelasKuliah',
-            'Nilai' => 'GetNilaiPerkuliahanKelas',
+            'Nilai' => 'GetDetailNilaiPerkuliahanKelas',
             default => throw new Exception("Action Feeder untuk [{$entity}] tidak ditemukan."),
         };
     }

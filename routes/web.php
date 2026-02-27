@@ -175,6 +175,9 @@ Route::middleware(['auth', 'role:Mahasiswa'])->prefix('mahasiswa')->name('mahasi
     Route::get('/jadwal', [\App\Http\Controllers\Mahasiswa\JadwalController::class, 'index'])->name('jadwal.index');
     Route::get('/presensi/show/{id}', [\App\Http\Controllers\Mahasiswa\DaftarKelasMahasiswaController::class, 'presensi'])->name('presensi.show');
 
+    // KHS Online
+    Route::get('khs', [\App\Http\Controllers\Mahasiswa\KhsMahasiswaController::class, 'index'])->name('khs.index');
+
     // KRS Online
     Route::get('krs', [\App\Http\Controllers\Mahasiswa\KrsController::class, 'index'])->name('krs.index');
     Route::post('krs/submit', [\App\Http\Controllers\Mahasiswa\KrsController::class, 'submit'])->name('krs.submit');

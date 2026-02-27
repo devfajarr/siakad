@@ -2,6 +2,11 @@
 
 @section('title', 'Detail Rekap Nilai - ' . $prodi->nama_program_studi)
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') }}" />
+@endpush
+
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="d-flex justify-content-between align-items-center py-3 mb-4">
@@ -20,7 +25,7 @@
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
                         <h5 class="mb-1">Kontrol Penguncian Massal</h5>
-                        <p class="mb-0 text-muted small">Semester: {{ $semesterId }}</p>
+                        <p class="mb-0 text-muted small">Semester: {{ $selectedSemester->nama_semester ?? $semesterId }}</p>
                     </div>
                     <div class="d-flex gap-2">
                         <form action="{{ route('admin.rekap-nilai.bulk-lock') }}" method="POST"
@@ -50,8 +55,8 @@
 
         <!-- Kelas List -->
         <div class="card">
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
+            <div class="card-datatable table-responsive text-nowrap">
+                <table class="table table-hover" id="tableKelas">
                     <thead class="table-light">
                         <tr>
                             <th width="50">No</th>
@@ -127,3 +132,35 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            if ($.fn.DataTable) {
+                $('#tableKelas').DataTable({
+                    language: {
+                        search: "Cari:",
+                        lengthMenu: "Tampilkan _MENU_ data",
+                        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                        infoEmpty: "Data tidak ditemukan",
+                        zeroRecords: "Data tidak ditemukan",
+                        paginate: {
+                            first: "Pertama",
+                            last: "Terakhir",
+                            next: '<i class="ri-arrow-right-s-line"></i>',
+                            previous: '<i class="ri-arrow-left-s-line"></i>'
+                        }
+                    },
+                    dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+                    displayLength: 25,
+                    lengthMenu: [10, 25, 50, 75, 100],
+                    order: [[0, 'asc']]
+                });
+
+                // Set title in the card header for search area consistency
+                $('div.head-label').html('<h5 class="card-title mb-0">Daftar Kelas & Progres Nilai</h5>');
+            }
+        });
+    </script>
+@endpush

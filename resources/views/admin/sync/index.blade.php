@@ -33,6 +33,14 @@
                             <h6 class="mb-0">{{ preg_replace('/(?<!^)[A-Z]/', ' $0', $entity['name']) }}</h6>
                         </div>
 
+                        @if ($entity['name'] === 'Nilai')
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="sync-all-nilai">
+                                <label class="form-check-label small" for="sync-all-nilai">Tarik Seluruh History (Abaikan Semester
+                                    Aktif)</label>
+                            </div>
+                        @endif
+
                         <div id="progress-container-{{ $entity['name'] }}" style="display: none;">
                             <div class="d-flex justify-content-between mb-1">
                                 <small class="text-muted fw-medium" id="status-text-{{ $entity['name'] }}">Processing...</small>
@@ -71,12 +79,18 @@
                 // Disable button
                 btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status"></span> Preparing...');
 
+                const filters = {};
+                if (entity === 'Nilai' && $('#sync-all-nilai').is(':checked')) {
+                    filters.all = true;
+                }
+
                 $.ajax({
                     url: "{{ route('admin.sync-manager.dispatch') }}",
                     method: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
-                        entity: entity
+                        entity: entity,
+                        filters: filters
                     },
                     success: function (response) {
                         if (response.status === 'success') {

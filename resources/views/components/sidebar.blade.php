@@ -283,6 +283,12 @@
                     <div data-i18n="KRS Online">KRS Online</div>
                 </a>
             </li>
+            <li class="menu-item {{ request()->routeIs('mahasiswa.khs.*') ? 'active' : '' }}">
+                <a href="{{ route('mahasiswa.khs.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-medal-line"></i>
+                    <div data-i18n="KHS Online">KHS Online</div>
+                </a>
+            </li>
         @endif
     </ul>
 </aside>

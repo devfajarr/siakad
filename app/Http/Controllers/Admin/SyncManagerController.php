@@ -43,11 +43,12 @@ class SyncManagerController extends Controller
     public function dispatchSync(Request $request)
     {
         $request->validate([
-            'entity' => 'required|string'
+            'entity' => 'required|string',
+            'filters' => 'nullable|array'
         ]);
 
         try {
-            $batchId = $this->syncService->dispatchSync($request->entity);
+            $batchId = $this->syncService->dispatchSync($request->entity, $request->filters ?? []);
 
             if ($batchId === 'empty') {
                 return response()->json([

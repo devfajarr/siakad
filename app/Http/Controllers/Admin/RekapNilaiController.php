@@ -51,10 +51,11 @@ class RekapNilaiController extends Controller
             ?? Semester::orderBy('id_semester', 'desc')->first();
 
         $semesterId = $request->get('semester_id', $activeSemester->id_semester);
+        $selectedSemester = Semester::where('id_semester', $semesterId)->first() ?? $activeSemester;
 
         $kelas = $this->rekapService->getClassDetailsByProdi($id_prodi, $semesterId);
 
-        return view('admin.nilai.rekap.show', compact('prodi', 'kelas', 'semesterId', 'activeSemester'));
+        return view('admin.nilai.rekap.show', compact('prodi', 'kelas', 'semesterId', 'activeSemester', 'selectedSemester'));
     }
 
     /**
