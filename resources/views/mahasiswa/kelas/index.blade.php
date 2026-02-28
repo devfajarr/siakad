@@ -21,68 +21,77 @@
             </div>
         </div>
         <div class="card-body">
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover datatables" id="tableKelas">
-                    <thead>
-                        <tr>
-                            <th>Kode MK</th>
-                            <th>Mata Kuliah</th>
-                            <th>Dosen Pengajar</th>
-                            <th>SKS</th>
-                            <th>Jadwal & Ruangan</th>
-                            <th class="text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($kelasKuliahs as $kelas)
+            @if($kelasKuliahs->isEmpty())
+                <div class="alert alert-warning d-flex align-items-center mb-0" role="alert">
+                    <i class="ri-error-warning-line ri-22px me-2"></i>
+                    Anda belum terdaftar pada kelas perkuliahan manapun di <b>Semester
+                        {{ $semesters->firstWhere('id_semester', $semesterId)->nama_semester ?? 'Terpilih' }}</b>.
+                </div>
+            @else
+                <div class="table-responsive text-nowrap">
+                    <table class="table table-hover datatables" id="tableKelas">
+                        <thead>
                             <tr>
-                                <td><span class="fw-bold">{{ $kelas->mataKuliah->kode_mk ?? '-' }}</span></td>
-                                <td>
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-medium">{{ $kelas->mataKuliah->nama_mk ?? '-' }}</span>
-                                        <small class="text-muted">Kelas: {{ $kelas->nama_kelas_kuliah }}</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    @if($kelas->dosenPengajars->isNotEmpty())
-                                        <div class="small">
-                                            <i class="ri-user-follow-line text-primary me-1"></i>
-                                            {{ $kelas->dosenPengajars->first()->nama_tampilan }}
-                                        </div>
-                                    @else
-                                        <span class="text-muted italic small">Belum ada dosen</span>
-                                    @endif
-                                </td>
-                                <td>{{ rtrim(rtrim(number_format($kelas->sks_mk ?? ($kelas->mataKuliah->sks ?? 0), 2), '0'), '.') }}</td>
-                                <td>
-                                    @forelse($kelas->jadwalKuliahs as $jadwal)
-                                        <div class="small">
-                                            <i class="ri-time-line text-primary me-1"></i>
-                                            {{ \App\Services\JadwalKuliahService::HARI[$jadwal->hari] }},
-                                            {{ substr($jadwal->jam_mulai, 0, 5) }}-{{ substr($jadwal->jam_selesai, 0, 5) }}
-                                            ({{ $jadwal->ruang->nama_ruang ?? '?' }})
-                                        </div>
-                                    @empty
-                                        <span class="text-muted italic small">Jadwal belum diset</span>
-                                    @endforelse
-                                </td>
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center gap-2">
-                                        <a href="{{ route('mahasiswa.kelas.show', $kelas->id) }}"
-                                            class="btn btn-sm btn-label-secondary">
-                                            Detail
-                                        </a>
-                                        <a href="{{ route('mahasiswa.presensi.show', $kelas->id) }}"
-                                            class="btn btn-sm btn-label-primary">
-                                            Presensi
-                                        </a>
-                                    </div>
-                                </td>
+                                <th>Kode MK</th>
+                                <th>Mata Kuliah</th>
+                                <th>Dosen Pengajar</th>
+                                <th>SKS</th>
+                                <th>Jadwal & Ruangan</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            @foreach($kelasKuliahs as $kelas)
+                                <tr>
+                                    <td><span class="fw-bold">{{ $kelas->mataKuliah->kode_mk ?? '-' }}</span></td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-medium">{{ $kelas->mataKuliah->nama_mk ?? '-' }}</span>
+                                            <small class="text-muted">Kelas: {{ $kelas->nama_kelas_kuliah }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if($kelas->dosenPengajars->isNotEmpty())
+                                            <div class="small">
+                                                <i class="ri-user-follow-line text-primary me-1"></i>
+                                                {{ $kelas->dosenPengajars->first()->nama_tampilan }}
+                                            </div>
+                                        @else
+                                            <span class="text-muted italic small">Belum ada dosen</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ rtrim(rtrim(number_format($kelas->sks_mk ?? ($kelas->mataKuliah->sks ?? 0), 2), '0'), '.') }}
+                                    </td>
+                                    <td>
+                                        @forelse($kelas->jadwalKuliahs as $jadwal)
+                                            <div class="small">
+                                                <i class="ri-time-line text-primary me-1"></i>
+                                                {{ \App\Services\JadwalKuliahService::HARI[$jadwal->hari] ?? $jadwal->hari }},
+                                                {{ substr($jadwal->jam_mulai, 0, 5) }}-{{ substr($jadwal->jam_selesai, 0, 5) }}
+                                                ({{ $jadwal->ruang->nama_ruang ?? '?' }})
+                                            </div>
+                                        @empty
+                                            <span class="text-muted italic small">Jadwal belum diset</span>
+                                        @endforelse
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="{{ route('mahasiswa.kelas.show', $kelas->id) }}"
+                                                class="btn btn-sm btn-label-secondary">
+                                                Detail
+                                            </a>
+                                            <a href="{{ route('mahasiswa.presensi.show', $kelas->id) }}"
+                                                class="btn btn-sm btn-label-primary">
+                                                Presensi
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
     </div>
 @endsection

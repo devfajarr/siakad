@@ -166,9 +166,39 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::put('/jadwal-global/{id}/update', [JadwalGlobalController::class, 'update'])->name('admin.jadwal-global.update');
     Route::get('/jadwal-global/kelas-by-semester', [JadwalGlobalController::class, 'getKelasBySemester'])->name('admin.jadwal-global.kelas-by-semester');
 
-    // Master Semester (Routing Aktivasi Global)
+    // Route Manajemen Ujian
+    Route::post('/ujian/{jadwal}/generate-peserta', [\App\Http\Controllers\Admin\JadwalUjianController::class, 'generatePeserta'])
+        ->name('admin.ujian.generate-peserta');
+    Route::get('/ujian/{jadwal}/peserta', [\App\Http\Controllers\Admin\JadwalUjianController::class, 'peserta'])
+        ->name('admin.ujian.peserta');
+    Route::post('/ujian/{jadwal}/peserta/{pesertaUjian}/mark-printed', [\App\Http\Controllers\Admin\JadwalUjianController::class, 'markAsPrinted'])
+        ->name('admin.ujian.mark-printed');
+    Route::post('/ujian/{jadwal}/peserta/{pesertaUjian}/toggle-dispensasi', [\App\Http\Controllers\Admin\JadwalUjianController::class, 'toggleDispensasi'])
+        ->name('admin.ujian.toggle-dispensasi');
+    Route::get('/ujian/print-kartu/{pesertaUjianId}', [\App\Http\Controllers\Admin\JadwalUjianController::class, 'printKartu'])
+        ->name('admin.ujian.print-kartu');
+
+    // Pengaturan Waktu Cetak Ujian Masing-Masing Semester
+    Route::get('/pengaturan-ujian', [\App\Http\Controllers\Admin\PengaturanUjianController::class, 'index'])
+        ->name('admin.pengaturan-ujian.index');
+    Route::post('/pengaturan-ujian', [\App\Http\Controllers\Admin\PengaturanUjianController::class, 'store'])
+        ->name('admin.pengaturan-ujian.store');
+
     Route::get('semester', [\App\Http\Controllers\SemesterController::class, 'index'])->name('admin.semester.index');
     Route::post('semester/set-active/{id}', [\App\Http\Controllers\SemesterController::class, 'setActive'])->name('admin.semester.set-active');
+
+    // Manajemen Ujian Semester (UTS/UAS)
+    Route::controller(\App\Http\Controllers\Admin\JadwalUjianController::class)->prefix('ujian')->name('admin.ujian.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::put('/{id}', 'update')->name('update');
+        Route::delete('/{id}', 'destroy')->name('destroy');
+        Route::post('/{id}/generate-peserta', 'generatePeserta')->name('generate-peserta');
+        Route::get('/{id}/peserta', 'peserta')->name('peserta');
+        Route::post('/cetak/{pesertaUjianId}', 'cetakKartu')->name('cetak-kartu');
+        Route::get('/print/{pesertaUjianId}', 'printKartu')->name('print-kartu');
+        Route::get('/permintaan-cetak', 'permintaanCetak')->name('permintaan-cetak');
+    });
 });
 
 Route::middleware(['auth', 'role:Mahasiswa'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
@@ -185,6 +215,10 @@ Route::middleware(['auth', 'role:Mahasiswa'])->prefix('mahasiswa')->name('mahasi
     Route::get('krs', [\App\Http\Controllers\Mahasiswa\KrsController::class, 'index'])->name('krs.index');
     Route::post('krs/submit', [\App\Http\Controllers\Mahasiswa\KrsController::class, 'submit'])->name('krs.submit');
     Route::get('krs/print', [\App\Http\Controllers\Mahasiswa\KrsController::class, 'print'])->name('krs.print');
+
+    // Kartu Ujian
+    Route::get('ujian', [\App\Http\Controllers\Mahasiswa\KartuUjianController::class, 'index'])->name('ujian.index');
+    Route::post('ujian/ajukan-cetak/{pesertaUjianId}', [\App\Http\Controllers\Mahasiswa\KartuUjianController::class, 'ajukanCetak'])->name('ujian.ajukan-cetak');
 });
 
 Route::middleware(['auth', 'role:Dosen'])->prefix('dosen')->name('dosen.')->group(function () {

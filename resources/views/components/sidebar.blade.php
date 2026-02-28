@@ -115,6 +115,12 @@
                     <div data-i18n="Rekapitulasi Nilai">Rekapitulasi Nilai</div>
                 </a>
             </li>
+            <li class="menu-item {{ request()->routeIs('admin.ujian.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.ujian.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-survey-line"></i>
+                    <div data-i18n="Manajemen Ujian">Manajemen Ujian</div>
+                </a>
+            </li>
 
             <!-- Manajemen Jabatan -->
             <li class="menu-header mt-5 small text-uppercase">
@@ -153,6 +159,12 @@
                 <a href="{{ route('admin.jadwal-global.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-calendar-todo-fill"></i>
                     <div data-i18n="Jadwal Terpadu">Jadwal Terpadu</div>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('admin.pengaturan-ujian.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.pengaturan-ujian.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-time-zone-line"></i>
+                    <div data-i18n="Pengaturan Ujian">Pengaturan Ujian</div>
                 </a>
             </li>
             <li class="menu-item {{ request()->routeIs('admin.ruangan.*') ? 'active' : '' }}">
@@ -287,6 +299,12 @@
                 <a href="{{ route('mahasiswa.khs.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-medal-line"></i>
                     <div data-i18n="KHS Online">KHS Online</div>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('mahasiswa.ujian.*') ? 'active' : '' }}">
+                <a href="{{ route('mahasiswa.ujian.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-survey-line"></i>
+                    <div data-i18n="Kartu Ujian">Kartu Ujian</div>
                 </a>
             </li>
         @endif

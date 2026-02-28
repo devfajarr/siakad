@@ -39,6 +39,18 @@
             </div>
         </div>
 
+        <!-- Info Kelayakan Ujian -->
+        <div class="alert alert-info d-flex align-items-center mb-4 shadow-sm border-0" role="alert">
+            <i class="ri-information-line fs-4 me-3 text-info"></i>
+            <div>
+                <strong>Informasi Kelayakan Ujian Mahasiswa:</strong> Untuk dapat di-generate sebagai peserta UTS/UAS,
+                mahasiswa wajib memiliki status <b>KRS ACC</b> dan persentase kehadiran minimal
+                <b>{{ config('academic.min_persentase_ujian', 75) }}%</b> dari target
+                <b>{{ config('academic.target_pertemuan_per_blok', 7) }} pertemuan</b> per blok ujian (UTS = Pertemuan 1-7,
+                UAS = Pertemuan 8-14).
+            </div>
+        </div>
+
         @if(session('success'))
             <div class="alert alert-success alert-dismissible" role="alert">
                 {{ session('success') }}

@@ -17,7 +17,7 @@
                         <i class="ri-arrow-left-line me-1"></i> Kembali ke Daftar Kelas
                     </a>
                 </div>
-                <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="card border-0 shadow-sm overflow-hidden mb-4">
                     <div class="card-body p-0">
                         <div class="row g-0">
                             <div class="col-md-8 p-6">
@@ -69,85 +69,94 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+                <!-- Info Kelayakan Ujian -->
+                <div class="alert alert-info d-flex align-items-center mb-4 shadow-sm border-0" role="alert">
+                    <i class="ri-information-line fs-4 me-3 text-info"></i>
+                    <div>
+                        <strong>Syarat Mengikuti Ujian (UTS/UAS):</strong> Anda dinyatakan layak dan dapat mencetak Kartu
+                        Ujian apabila jadwal KRS Anda berstatus <b>ACC</b> dan persentase kehadiran minimal mncapai
+                        <b>{{ config('academic.min_persentase_ujian', 75) }}%</b> dari target
+                        <b>{{ config('academic.target_pertemuan_per_blok', 7) }} pertemuan</b> per blok ujian (UTS = Pert
+                        1-7, UAS = Pert 8-14).
+                    </div>
+                </div>
 
-        <div class="card border-0 shadow-sm">
-            <div class="card-header border-bottom">
-                <h5 class="card-title mb-0">Riwayat Presensi & Jurnal Perkuliahan</h5>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-center" style="width: 70px;">Pert.</th>
-                            <th>Tanggal & Waktu</th>
-                            <th>Materi / Bahasan</th>
-                            <th class="text-center">Status</th>
-                            <th>Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($pertemuans as $pertemuan)
-                            @php
-                                $presensi = $pertemuan->presensiMahasiswas->first();
-                                $statusClass = 'bg-label-secondary';
-                                $statusLabel = 'Belum Ada';
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header border-bottom">
+                        <h5 class="card-title mb-0">Riwayat Presensi & Jurnal Perkuliahan</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center" style="width: 70px;">Pert.</th>
+                                    <th>Tanggal & Waktu</th>
+                                    <th>Materi / Bahasan</th>
+                                    <th class="text-center">Status</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($pertemuans as $pertemuan)
+                                    @php
+                                        $presensi = $pertemuan->presensiMahasiswas->first();
+                                        $statusClass = 'bg-label-secondary';
+                                        $statusLabel = 'Belum Ada';
 
-                                if ($presensi) {
-                                    switch ($presensi->status_kehadiran) {
-                                        case 'H':
-                                            $statusClass = 'bg-label-success';
-                                            $statusLabel = 'Hadir';
-                                            break;
-                                        case 'S':
-                                            $statusClass = 'bg-label-warning';
-                                            $statusLabel = 'Sakit';
-                                            break;
-                                        case 'I':
-                                            $statusClass = 'bg-label-info';
-                                            $statusLabel = 'Izin';
-                                            break;
-                                        case 'A':
-                                            $statusClass = 'bg-label-danger';
-                                            $statusLabel = 'Alfa';
-                                            break;
-                                    }
-                                }
-                            @endphp
-                            <tr>
-                                <td class="text-center fw-bold">{{ $pertemuan->pertemuan_ke }}</td>
-                                <td>
-                                    <div class="fw-semibold">{{ $pertemuan->tanggal->format('d M Y') }}</div>
-                                    <small class="text-muted">{{ substr($pertemuan->jam_mulai, 0, 5) }} -
-                                        {{ substr($pertemuan->jam_selesai, 0, 5) }}</small>
-                                </td>
-                                <td>
-                                    <div class="text-wrap" style="max-width: 400px;">
-                                        {{ $pertemuan->materi }}
-                                        <br>
-                                        <small
-                                            class="badge bg-label-secondary mt-1">{{ $pertemuan->metode_pembelajaran }}</small>
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge {{ $statusClass }} px-3">{{ $statusLabel }}</span>
-                                </td>
-                                <td>
-                                    <small class="text-muted fst-italic">{{ $presensi->keterangan ?? '-' }}</small>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <i class="ri-calendar-todo-line ri-3x text-light mb-3 d-block"></i>
-                                    <p class="text-muted">Belum ada data pertemuan yang dicatat oleh dosen.</p>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                        if ($presensi) {
+                                            switch ($presensi->status_kehadiran) {
+                                                case 'H':
+                                                    $statusClass = 'bg-label-success';
+                                                    $statusLabel = 'Hadir';
+                                                    break;
+                                                case 'S':
+                                                    $statusClass = 'bg-label-warning';
+                                                    $statusLabel = 'Sakit';
+                                                    break;
+                                                case 'I':
+                                                    $statusClass = 'bg-label-info';
+                                                    $statusLabel = 'Izin';
+                                                    break;
+                                                case 'A':
+                                                    $statusClass = 'bg-label-danger';
+                                                    $statusLabel = 'Alfa';
+                                                    break;
+                                            }
+                                        }
+                                    @endphp
+                                    <tr>
+                                        <td class="text-center fw-bold">{{ $pertemuan->pertemuan_ke }}</td>
+                                        <td>
+                                            <div class="fw-semibold">{{ $pertemuan->tanggal->format('d M Y') }}</div>
+                                            <small class="text-muted">{{ substr($pertemuan->jam_mulai, 0, 5) }} -
+                                                {{ substr($pertemuan->jam_selesai, 0, 5) }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="text-wrap" style="max-width: 400px;">
+                                                {{ $pertemuan->materi }}
+                                                <br>
+                                                <small
+                                                    class="badge bg-label-secondary mt-1">{{ $pertemuan->metode_pembelajaran }}</small>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge {{ $statusClass }} px-3">{{ $statusLabel }}</span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted fst-italic">{{ $presensi->keterangan ?? '-' }}</small>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5">
+                                            <i class="ri-calendar-todo-line ri-3x text-light mb-3 d-block"></i>
+                                            <p class="text-muted">Belum ada data pertemuan yang dicatat oleh dosen.</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 @endsection

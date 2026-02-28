@@ -70,4 +70,12 @@ class Semester extends Model
     {
         return $this->hasMany(KelasKuliah::class, 'id_semester', 'id_semester');
     }
+
+    /**
+     * Relasi ke Pengaturan Ujian (Batas Waktu Cetak Kartu) di semester ini.
+     */
+    public function pengaturanUjians(): HasMany
+    {
+        return $this->hasMany(PengaturanUjian::class, 'semester_id', 'id_semester');
+    }
 }

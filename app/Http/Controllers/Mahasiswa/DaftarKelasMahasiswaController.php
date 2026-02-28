@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\KelasKuliah;
-use App\Models\PesertaKelasKuliah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -29,10 +28,11 @@ class DaftarKelasMahasiswaController extends Controller
         $riwayatAktif = $mahasiswa->riwayatAktif;
         $semesterId = $request->get('semester_id', getActiveSemesterId());
 
-        // Ambil daftar kelas via PesertaKelasKuliah (KRS)
-        $kelasKuliahs = KelasKuliah::whereHas('pesertaKelasKuliah', function ($query) use ($riwayatAktif) {
-            $query->where('riwayat_pendidikan_id', $riwayatAktif->id);
-        })
+        // Ambil daftar kelas via PesertaKelasKuliah (KRS) berdasarkan semester yang dipilih
+        $kelasKuliahs = KelasKuliah::where('id_semester', $semesterId)
+            ->whereHas('pesertaKelasKuliah', function ($query) use ($riwayatAktif) {
+                $query->where('riwayat_pendidikan_id', $riwayatAktif->id);
+            })
             ->with(['mataKuliah', 'dosenPengajars.dosen', 'dosenPengajars.dosenAliasLokal', 'jadwalKuliahs.ruang'])
             ->get();
 
