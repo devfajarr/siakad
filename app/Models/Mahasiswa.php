@@ -26,6 +26,7 @@ class Mahasiswa extends Model
         'email',
         'id_prodi',
         'user_id',
+        'tipe_kelas',
         'bypass_krs_until',
         'status_sinkronisasi',
         'last_synced_at',

@@ -16,6 +16,7 @@ class JadwalKuliah extends Model
         'jam_mulai',
         'jam_selesai',
         'jenis_pertemuan',
+        'tipe_waktu',
     ];
 
     protected $casts = [

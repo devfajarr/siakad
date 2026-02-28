@@ -27,6 +27,7 @@ class JadwalKuliahController extends Controller
             'jam_mulai' => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
             'jenis_pertemuan' => 'nullable|string|max:255',
+            'tipe_waktu' => 'required|in:Pagi,Sore,Universal',
         ]);
 
         try {
@@ -60,6 +61,7 @@ class JadwalKuliahController extends Controller
             'jam_mulai' => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
             'jenis_pertemuan' => 'nullable|string|max:255',
+            'tipe_waktu' => 'required|in:Pagi,Sore,Universal',
         ]);
 
         try {

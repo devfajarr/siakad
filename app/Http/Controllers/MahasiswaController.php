@@ -56,6 +56,122 @@ class MahasiswaController extends Controller
         }
     }
 
+    public function toggleTipeKelas(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:mahasiswas,id',
+            'tipe_kelas' => 'required|in:Pagi,Sore'
+        ]);
+
+        $mahasiswa = Mahasiswa::findOrFail($request->id);
+        $mahasiswa->tipe_kelas = $request->tipe_kelas;
+        // Kita juga tambahkan is_local_change dsb jika diperlukan,
+        // namun karena tipe_kelas adalah penanda lokal (hanya sync jika diminta/ada config),
+        // minimal kita set is_local_change.
+        $mahasiswa->is_local_change = true;
+        if ($mahasiswa->status_sinkronisasi !== 'created_local') {
+            $mahasiswa->status_sinkronisasi = 'updated_local';
+        }
+        $mahasiswa->save();
+
+        Log::info("CRUD_UPDATE: Tipe Kelas Mahasiswa ditoggle", [
+            'mahasiswa_id' => $mahasiswa->id,
+            'tipe_kelas' => $request->tipe_kelas
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status tipe kelas berhasil diubah menjadi ' . $request->tipe_kelas,
+            'tipe_kelas' => $request->tipe_kelas
+        ]);
+    }
+
+    public function bulkTipeKelas(Request $request)
+    {
+        $request->validate([
+            'mahasiswa_ids' => 'required|array',
+            'mahasiswa_ids.*' => 'exists:mahasiswas,id',
+            'tipe_kelas' => 'required|in:Pagi,Sore'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $updated = Mahasiswa::whereIn('id', $request->mahasiswa_ids)->update([
+                'tipe_kelas' => $request->tipe_kelas,
+                'is_local_change' => true,
+                'status_sinkronisasi' => DB::raw("CASE WHEN status_sinkronisasi = 'created_local' THEN status_sinkronisasi ELSE 'updated_local' END")
+            ]);
+
+            DB::commit();
+
+            Log::info("CRUD_UPDATE: Bulk Update Tipe Kelas Mahasiswa", [
+                'count' => $updated,
+                'tipe_kelas' => $request->tipe_kelas
+            ]);
+
+            return back()->with('success', "Berhasil mengubah tipe kelas menjadi {$request->tipe_kelas} untuk {$updated} mahasiswa.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("SYSTEM_ERROR: Gagal bulk update tipe kelas mahasiswa", ['message' => $e->getMessage()]);
+            return back()->with('error', "Gagal mengubah tipe kelas massal: " . $e->getMessage());
+        }
+    }
+
+    public function initTipeKelas()
+    {
+        DB::beginTransaction();
+        try {
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Mahasiswa> $mahasiswas */
+            $mahasiswas = Mahasiswa::whereNull('tipe_kelas')
+                ->with('riwayatAktif')
+                ->get();
+
+            $updated = 0;
+            $skipped = 0;
+
+            foreach ($mahasiswas as $mhs) {
+                $nim = $mhs->riwayatAktif->nim ?? null;
+
+                if (!$nim || strlen($nim) < 5) {
+                    $skipped++;
+                    continue;
+                }
+
+                $digit5 = substr($nim, 4, 1);
+                $tipe = ($digit5 === '1') ? 'Pagi' : 'Sore';
+
+                $mhs->tipe_kelas = $tipe;
+                $mhs->is_local_change = true;
+                if ($mhs->status_sinkronisasi !== 'created_local') {
+                    $mhs->status_sinkronisasi = 'updated_local';
+                }
+                $mhs->save();
+                $updated++;
+            }
+
+            DB::commit();
+
+            Log::info("CRUD_UPDATE: Inisialisasi Tipe Kelas Massal dari NIM", [
+                'updated' => $updated,
+                'skipped' => $skipped
+            ]);
+
+            $msg = "Berhasil menginisialisasi tipe kelas untuk {$updated} mahasiswa.";
+            if ($skipped > 0) {
+                $msg .= " ({$skipped} mahasiswa di-skip karena NIM tidak valid.)";
+            }
+
+            return response()->json(['success' => true, 'message' => $msg, 'updated' => $updated, 'skipped' => $skipped]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("SYSTEM_ERROR: Gagal inisialisasi tipe kelas massal", [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function bulkGenerateUsers(Request $request, \App\Services\MahasiswaAccountGenerationService $service)
     {
         $request->validate([
@@ -103,7 +219,16 @@ class MahasiswaController extends Controller
             });
         }
 
-        $mahasiswa = $query->orderBy('nama_mahasiswa')->get();
+        // Urutkan berdasarkan Tahun Angkatan terbaru (id_periode_masuk DESC), lalu nama
+        $mahasiswa = $query
+            ->orderByDesc(
+                \App\Models\RiwayatPendidikan::select('id_periode_masuk')
+                    ->whereColumn('riwayat_pendidikans.id_mahasiswa', 'mahasiswas.id')
+                    ->orderBy('id_periode_masuk', 'desc')
+                    ->limit(1)
+            )
+            ->orderBy('nama_mahasiswa')
+            ->get();
 
         // Data unuk dropdown filter
         $semesters = \App\Models\Semester::orderBy('id_semester', 'desc')->get();

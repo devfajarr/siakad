@@ -253,11 +253,21 @@
                                 <input type="time" id="jam_selesai" name="jam_selesai" class="form-control" required>
                             </div>
 
-                            <div class="col-md-12">
+                            <div class="col-md-6">
+                                <label class="form-label" for="tipe_waktu">Tipe Waktu/Shift <span
+                                        class="text-danger">*</span></label>
+                                <select id="tipe_waktu" name="tipe_waktu" class="form-select" required>
+                                    <option value="Universal">Universal (Pagi & Sore)</option>
+                                    <option value="Pagi">Kelas Pagi</option>
+                                    <option value="Sore">Kelas Sore / Karyawan</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
                                 <label class="form-label" for="jenis_pertemuan">Jenis Pertemuan <span
                                         class="text-muted">(opsional)</span></label>
                                 <input type="text" id="jenis_pertemuan" name="jenis_pertemuan" class="form-control"
-                                    placeholder="Contoh: Teori, Praktikum Terpadu">
+                                    placeholder="Contoh: Teori, Praktikum">
                             </div>
                         </div>
 
@@ -349,6 +359,6 @@
                 var validationModal = new bootstrap.Modal(document.getElementById('modalJadwalGlobal'));
                 validationModal.show();
             @endif
-                                    });
+                                        });
     </script>
 @endpush

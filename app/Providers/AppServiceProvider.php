@@ -20,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
     {
         \App\Models\Dosen::observe(\App\Observers\DosenObserver::class);
         \App\Models\Kaprodi::observe(\App\Observers\KaprodiObserver::class);
+        \App\Models\Mahasiswa::observe(\App\Observers\MahasiswaObserver::class);
         \Illuminate\Pagination\Paginator::useBootstrapFive();
 
         \Illuminate\Support\Facades\Gate::define('is-academic-advisor', function (\App\Models\User $user) {

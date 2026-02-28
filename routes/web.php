@@ -55,6 +55,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Mahasiswa Sync & CRUD
     Route::post('mahasiswa/generate-user/{mahasiswa}', [MahasiswaController::class, 'generateUser'])->name('mahasiswa.generate-user');
     Route::post('mahasiswa/bulk-generate-users', [MahasiswaController::class, 'bulkGenerateUsers'])->name('mahasiswa.bulk-generate-users');
+    Route::post('mahasiswa/toggle-tipe-kelas', [MahasiswaController::class, 'toggleTipeKelas'])->name('mahasiswa.toggle-tipe-kelas');
+    Route::post('mahasiswa/bulk-tipe-kelas', [MahasiswaController::class, 'bulkTipeKelas'])->name('mahasiswa.bulk-tipe-kelas');
+    Route::post('mahasiswa/init-tipe-kelas', [MahasiswaController::class, 'initTipeKelas'])->name('mahasiswa.init-tipe-kelas');
     Route::resource('mahasiswa', MahasiswaController::class);
 
     // Riwayat Pendidikan CRUD (store, edit, update, destroy)

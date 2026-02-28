@@ -38,8 +38,17 @@ class KrsController extends Controller
             ->distinct()
             ->get();
 
-        // 4. Ambil Item KRS
-        $krsItems = PesertaKelasKuliah::with(['kelasKuliah.mataKuliah', 'kelasKuliah.dosenPengajar.dosen'])
+        // 4. Ambil Item KRS, dengan memfilter relasi jadwal sesuai tipe kelas mahasiswa
+        $tipeKelas = $mahasiswa->tipe_kelas;
+        $krsItems = PesertaKelasKuliah::with([
+            'kelasKuliah.mataKuliah',
+            'kelasKuliah.dosenPengajar.dosen',
+            'kelasKuliah.jadwalKuliahs' => function ($query) use ($tipeKelas) {
+                if ($tipeKelas) {
+                    $query->whereIn('tipe_waktu', [$tipeKelas, 'Universal']);
+                }
+            }
+        ])
             ->whereIn('riwayat_pendidikan_id', $riwayatIds)
             ->whereHas('kelasKuliah', function ($q) use ($semesterDipilih) {
                 $q->where('id_semester', $semesterDipilih->id_semester);

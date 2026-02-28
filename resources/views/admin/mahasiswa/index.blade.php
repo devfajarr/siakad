@@ -12,6 +12,30 @@
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/flatpickr/flatpickr.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-rowgroup-bs5/rowgroup.bootstrap5.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/@form-validation/form-validation.css') }}" />
+    <style>
+        /* Fix toggle switch shrinking inside DataTables scrollX */
+        .dataTables_scrollBody .form-check.form-switch {
+            min-width: 120px !important;
+            padding-left: 2.5em !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.4em !important;
+        }
+
+        .dataTables_scrollBody .form-check.form-switch .form-check-input {
+            width: 2.5em !important;
+            min-width: 2.5em !important;
+            height: 1.3em !important;
+            flex-shrink: 0 !important;
+            cursor: pointer !important;
+            margin-top: 0 !important;
+        }
+
+        .dataTables_scrollBody .form-check.form-switch .form-check-label {
+            white-space: nowrap !important;
+            cursor: pointer !important;
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -31,6 +55,7 @@
                         <th>NIM</th>
                         <th>Program Studi</th>
                         <th>Tahun Angkatan</th>
+                        <th width="140px">Tipe Kelas</th>
                         <th>Jenis Kelamin</th>
                         <th>Agama</th>
                         <th>Total SKS Diambil</th>
@@ -42,28 +67,36 @@
                         <tr>
                             <td>
                                 @if (is_null($item->user_id))
-                                    <input type="checkbox" class="form-check-input mahasiswa-checkbox" name="mahasiswa_ids[]" value="{{ $item->id }}">
+                                    <input type="checkbox" class="form-check-input mahasiswa-checkbox" name="mahasiswa_ids[]"
+                                        value="{{ $item->id }}">
                                 @endif
                             </td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <a href="{{ route('admin.mahasiswa.show', $item->id) }}" class="btn btn-icon btn-sm btn-info rounded-pill" title="Detail">
+                                    <a href="{{ route('admin.mahasiswa.show', $item->id) }}"
+                                        class="btn btn-icon btn-sm btn-info rounded-pill" title="Detail">
                                         <i class="ri-search-line"></i>
                                     </a>
-                                    <a href="{{ route('admin.mahasiswa.edit', $item->id) }}" class="btn btn-icon btn-sm btn-warning rounded-pill" title="Edit">
+                                    <a href="{{ route('admin.mahasiswa.edit', $item->id) }}"
+                                        class="btn btn-icon btn-sm btn-warning rounded-pill" title="Edit">
                                         <i class="ri-pencil-line"></i>
                                     </a>
-                                    <form action="{{ route('admin.mahasiswa.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                    <form action="{{ route('admin.mahasiswa.destroy', $item->id) }}" method="POST"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-icon btn-sm btn-danger rounded-pill" title="Delete">
+                                        <button type="submit" class="btn btn-icon btn-sm btn-danger rounded-pill"
+                                            title="Delete">
                                             <i class="ri-delete-bin-line"></i>
                                         </button>
                                     </form>
                                     @if(is_null($item->user_id) && !empty($item->riwayatAktif->nim))
-                                        <form action="{{ route('admin.mahasiswa.generate-user', $item->id) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('admin.mahasiswa.generate-user', $item->id) }}" method="POST"
+                                            class="d-inline">
                                             @csrf
-                                            <button type="submit" class="btn btn-icon btn-sm btn-success rounded-pill" title="Generate Akun Login">
+                                            <button type="submit" class="btn btn-icon btn-sm btn-success rounded-pill"
+                                                title="Generate Akun Login">
                                                 <i class="ri-user-add-line"></i>
                                             </button>
                                         </form>
@@ -72,18 +105,32 @@
                             </td>
                             <td>
                                 @if ($item->is_synced)
-                                    <span class="badge bg-success rounded-pill"> <i class="ri-check-line me-1"></i> sudah sync</span>
+                                    <span class="badge bg-success rounded-pill"> <i class="ri-check-line me-1"></i> sudah
+                                        sync</span>
                                 @else
                                     <span class="badge bg-warning rounded-pill"> <i class="ri-time-line me-1"></i> belum sync</span>
                                 @endif
                             </td>
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{  $loop->iteration }}</td>
                             <td>
                                 <span class="fw-bold text-primary">{{ $item->nama_mahasiswa }}</span>
                             </td>
                             <td>{{ $item->riwayatAktif->nim ?? '-' }}</td>
                             <td>{{ $item->riwayatAktif->prodi->nama_program_studi ?? '-' }}</td>
                             <td>{{ $item->riwayatAktif->semester->id_tahun_ajaran ?? '-' }}</td>
+                            <td>
+                                <div class="form-check form-switch mb-0" style="min-width: 110px; padding-left: 2.5em;">
+                                    <input class="form-check-input toggle-tipe-kelas" type="checkbox" role="switch"
+                                        style="width: 2.5em; height: 1.3em;" data-id="{{ $item->id }}" {{ $item->tipe_kelas === 'Sore' ? 'checked' : '' }}>
+                                    <label class="form-check-label tipe-label-{{ $item->id }}" style="white-space: nowrap;">
+                                        @if($item->tipe_kelas === 'Sore')
+                                            <span class="badge bg-warning">Sore</span>
+                                        @else
+                                            <span class="badge bg-info">{{ $item->tipe_kelas ?: '-' }}</span>
+                                        @endif
+                                    </label>
+                                </div>
+                            </td>
                             <td>{{ $item->jenis_kelamin == 'L' ? 'Laki - Laki' : 'Perempuan' }}</td>
                             <td>{{ $item->agama->nama_agama ?? '-' }}</td>
                             <td class="text-center">
@@ -96,7 +143,7 @@
             </table>
         </div>
         <div class="card-footer py-2">
-             {{-- Pagination handled by DataTables --}}
+            {{-- Pagination handled by DataTables --}}
         </div>
     </div>
 
@@ -113,7 +160,8 @@
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label">Tahun Angkatan / Semester Masuk</label>
-                                <select class="form-select select2-filter" name="periode_masuk" data-placeholder="-- Semua Angkatan --">
+                                <select class="form-select select2-filter" name="periode_masuk"
+                                    data-placeholder="-- Semua Angkatan --">
                                     <option value="">-- Semua Angkatan --</option>
                                     @foreach($semesters as $smt)
                                         <option value="{{ $smt->id_semester }}" {{ request('periode_masuk') == $smt->id_semester ? 'selected' : '' }}>
@@ -124,7 +172,8 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Program Studi</label>
-                                <select class="form-select select2-filter" name="prodi" data-placeholder="-- Semua Program Studi --">
+                                <select class="form-select select2-filter" name="prodi"
+                                    data-placeholder="-- Semua Program Studi --">
                                     <option value="">-- Semua Program Studi --</option>
                                     @foreach($prodis as $prd)
                                         <option value="{{ $prd->id_prodi }}" {{ request('prodi') == $prd->id_prodi ? 'selected' : '' }}>
@@ -138,7 +187,8 @@
                     <div class="modal-footer d-flex justify-content-between">
                         <a href="{{ route('admin.mahasiswa.index') }}" class="btn btn-outline-secondary">Reset</a>
                         <div>
-                            <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Batal</button>
+                            <button type="button" class="btn btn-outline-secondary me-2"
+                                data-bs-dismiss="modal">Batal</button>
                             <button type="submit" class="btn btn-primary">Terapkan Filter</button>
                         </div>
                     </div>
@@ -163,16 +213,26 @@
 
             if (dt_basic_table.length) {
                 var dt_basic = dt_basic_table.DataTable({
-                    columnDefs: [{
-                        // Actions
-                        targets: 0,
-                        orderable: false,
-                        searchable: false,
-                    }
+                    order: [],
+                    columnDefs: [
+                        {
+                            targets: [0, 1],
+                            orderable: false,
+                            searchable: false,
+                        },
+                        {
+                            targets: 8,
+                            orderable: false,
+                            searchable: false,
+                            width: '140px'
+                        }
                     ],
-                    dom: '<"card-header flex-column flex-md-row border-bottom"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6 mt-5 mt-md-0"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-                    displayLength: 7,
-                    lengthMenu: [7, 10, 25, 50, 75, 100],
+                    dom: '<"card-header flex-column flex-md-row border-bottom pb-0"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>>' +
+                        '<"row px-3 py-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>' +
+                        't' +
+                        '<"row px-3 py-2"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+                    displayLength: 25,
+                    lengthMenu: [10, 25, 50, 100],
                     buttons: [
                         {
                             text: '<i class="ri-filter-3-line ri-16px me-sm-1"></i> <span class="d-none d-sm-inline-block">Filter</span>',
@@ -191,7 +251,7 @@
                                     text: '<i class="ri-printer-line me-1" ></i>Print',
                                     className: 'dropdown-item',
                                     exportOptions: {
-                                        columns: [0, 1, 2, 3, 4, 5, 6],
+                                        columns: [3, 4, 5, 6, 7, 9, 10, 11, 12],
                                     }
                                 },
                                 {
@@ -199,7 +259,7 @@
                                     text: '<i class="ri-file-text-line me-1" ></i>Csv',
                                     className: 'dropdown-item',
                                     exportOptions: {
-                                        columns: [0, 1, 2, 3, 4, 5, 6],
+                                        columns: [3, 4, 5, 6, 7, 9, 10, 11, 12],
                                     }
                                 },
                                 {
@@ -207,7 +267,7 @@
                                     text: '<i class="ri-file-excel-line me-1"></i>Excel',
                                     className: 'dropdown-item',
                                     exportOptions: {
-                                        columns: [0, 1, 2, 3, 4, 5, 6],
+                                        columns: [3, 4, 5, 6, 7, 9, 10, 11, 12],
                                     }
                                 },
                                 {
@@ -215,7 +275,7 @@
                                     text: '<i class="ri-file-pdf-line me-1"></i>Pdf',
                                     className: 'dropdown-item',
                                     exportOptions: {
-                                        columns: [0, 1, 2, 3, 4, 5, 6],
+                                        columns: [3, 4, 5, 6, 7, 9, 10, 11, 12],
                                     }
                                 },
                                 {
@@ -223,49 +283,48 @@
                                     text: '<i class="ri-file-copy-line me-1" ></i>Copy',
                                     className: 'dropdown-item',
                                     exportOptions: {
-                                        columns: [0, 1, 2, 3, 4, 5, 6],
+                                        columns: [3, 4, 5, 6, 7, 9, 10, 11, 12],
                                     }
                                 }
                             ]
                         },
                         {
-                            text: '<i class="ri-user-add-line ri-16px me-sm-1"></i> <span class="d-none d-sm-inline-block">Buat Akun Kolektif</span>',
-                            className: 'btn btn-success waves-effect waves-light me-2',
-                            action: function (e, dt, node, config) {
-                                let selectedIds = [];
-                                $('.mahasiswa-checkbox:checked').each(function () {
-                                    selectedIds.push($(this).val());
-                                });
-
-                                if (selectedIds.length === 0) {
-                                    alert('Silakan pilih minimal satu mahasiswa untuk dibuatkan akun.');
-                                    return;
+                            extend: 'collection',
+                            className: 'btn btn-outline-info dropdown-toggle me-2 waves-effect waves-light',
+                            text: '<i class="ri-tools-line me-sm-1"></i> <span class="d-none d-sm-inline-block">Aksi</span>',
+                            buttons: [
+                                {
+                                    text: '<i class="ri-user-add-line me-1"></i> Buat Akun Kolektif',
+                                    className: 'dropdown-item',
+                                    action: function () {
+                                        let selectedIds = [];
+                                        $('.mahasiswa-checkbox:checked').each(function () { selectedIds.push($(this).val()); });
+                                        if (selectedIds.length === 0) { alert('Silakan pilih minimal satu mahasiswa.'); return; }
+                                        if (confirm(`Buat akun massal untuk ${selectedIds.length} mahasiswa terpilih?`)) {
+                                            let form = $('<form>', { 'method': 'POST', 'action': '{{ route("admin.mahasiswa.bulk-generate-users") }}' });
+                                            form.append($('<input>', { 'type': 'hidden', 'name': '_token', 'value': '{{ csrf_token() }}' }));
+                                            selectedIds.forEach(function (id) { form.append($('<input>', { 'type': 'hidden', 'name': 'mahasiswa_ids[]', 'value': id })); });
+                                            $(document.body).append(form);
+                                            form.submit();
+                                        }
+                                    }
+                                },
+                                {
+                                    text: '<i class="ri-sun-line me-1"></i> Set Tipe: Pagi',
+                                    className: 'dropdown-item',
+                                    action: function () { processBulkTipeKelas('Pagi'); }
+                                },
+                                {
+                                    text: '<i class="ri-moon-line me-1"></i> Set Tipe: Sore',
+                                    className: 'dropdown-item',
+                                    action: function () { processBulkTipeKelas('Sore'); }
+                                },
+                                {
+                                    text: '<i class="ri-refresh-line me-1"></i> Inisialisasi Tipe Kelas',
+                                    className: 'dropdown-item',
+                                    action: function () { processInitTipeKelas(); }
                                 }
-
-                                if (confirm(`Apakah Anda yakin ingin membuat akun secara massal untuk ${selectedIds.length} mahasiswa terpilih?`)) {
-                                    let form = $('<form>', {
-                                        'method': 'POST',
-                                        'action': '{{ route("admin.mahasiswa.bulk-generate-users") }}'
-                                    });
-
-                                    form.append($('<input>', {
-                                        'type': 'hidden',
-                                        'name': '_token',
-                                        'value': '{{ csrf_token() }}'
-                                    }));
-
-                                    selectedIds.forEach(function (id) {
-                                        form.append($('<input>', {
-                                            'type': 'hidden',
-                                            'name': 'mahasiswa_ids[]',
-                                            'value': id
-                                        }));
-                                    });
-
-                                    $(document.body).append(form);
-                                    form.submit();
-                                }
-                            }
+                            ]
                         },
                         {
                             text: '<i class="ri-add-line ri-16px me-sm-1"></i> <span class="d-none d-sm-inline-block">Tambah Mahasiswa</span>',
@@ -276,7 +335,15 @@
                         }
                     ],
                     responsive: false,
-                    scrollX: true
+                    scrollX: true,
+                    drawCallback: function (settings) {
+                        // Dynamic row numbering sesuai dengan page saat ini
+                        var api = this.api();
+                        var startIndex = api.page.info().start;
+                        api.column(3, { page: 'current' }).nodes().each(function (cell, i) {
+                            cell.innerHTML = startIndex + i + 1;
+                        });
+                    }
                 });
 
                 // Handle select all checkbox
@@ -289,7 +356,7 @@
                 $('.datatables-basic').on('change', '.mahasiswa-checkbox', function () {
                     var totalCheckboxes = $('.mahasiswa-checkbox').length;
                     var checkedCheckboxes = $('.mahasiswa-checkbox:checked').length;
-                    
+
                     if (totalCheckboxes === checkedCheckboxes) {
                         $('#checkAll').prop('checked', true);
                         $('#checkAll').prop('indeterminate', false);
@@ -307,6 +374,46 @@
                     filterBadge = '<span class="badge bg-primary ms-2 fs-6"><i class="ri-filter-fill"></i> Data Difilter</span>';
                 @endif
                 $('div.head-label').html('<h5 class="card-title mb-0">Daftar Mahasiswa' + filterBadge + '</h5>');
+
+                // AJAX Handle Toggle Tipe Kelas (Checked = Sore, Unchecked = Pagi)
+                $('.datatables-basic').on('change', '.toggle-tipe-kelas', function () {
+                    let id = $(this).data('id');
+                    let isChecked = $(this).is(':checked');
+                    let newTipe = isChecked ? 'Sore' : 'Pagi';
+                    let $label = $('.tipe-label-' + id);
+                    let $checkbox = $(this);
+
+                    $checkbox.prop('disabled', true);
+
+                    $.ajax({
+                        url: '{{ route("admin.mahasiswa.toggle-tipe-kelas") }}',
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            id: id,
+                            tipe_kelas: newTipe
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                if (newTipe === 'Sore') {
+                                    $label.html('<span class="badge bg-warning">Sore</span>');
+                                } else {
+                                    $label.html('<span class="badge bg-info">Pagi</span>');
+                                }
+                            } else {
+                                alert('Gagal merubah status!');
+                                $checkbox.prop('checked', !isChecked);
+                            }
+                        },
+                        error: function () {
+                            alert('Terjadi kesalahan server!');
+                            $checkbox.prop('checked', !isChecked);
+                        },
+                        complete: function () {
+                            $checkbox.prop('disabled', false);
+                        }
+                    });
+                });
             }
 
             if ($('.select2-filter').length) {
@@ -317,5 +424,83 @@
                 });
             }
         });
+
+        // Function for Bulk Tipe Kelas Updates
+        function processBulkTipeKelas(targetTipe) {
+            let selectedIds = [];
+            $('.mahasiswa-checkbox:checked').each(function () {
+                selectedIds.push($(this).val());
+            });
+
+            if (selectedIds.length === 0) {
+                alert('Silakan pilih minimal satu mahasiswa.');
+                return;
+            }
+
+            if (confirm(`Apakah Anda yakin ingin mengubah tipe kelas menjadi ${targetTipe} untuk ${selectedIds.length} mahasiswa terpilih?`)) {
+                let form = $('<form>', {
+                    'method': 'POST',
+                    'action': '{{ route("admin.mahasiswa.bulk-tipe-kelas") }}'
+                });
+
+                form.append($('<input>', {
+                    'type': 'hidden',
+                    'name': '_token',
+                    'value': '{{ csrf_token() }}'
+                }));
+
+                form.append($('<input>', {
+                    'type': 'hidden',
+                    'name': 'tipe_kelas',
+                    'value': targetTipe
+                }));
+
+                selectedIds.forEach(function (id) {
+                    form.append($('<input>', {
+                        'type': 'hidden',
+                        'name': 'mahasiswa_ids[]',
+                        'value': id
+                    }));
+                });
+
+                $(document.body).append(form);
+                form.submit();
+            }
+        }
+
+        // Function for Mass Init Tipe Kelas from NIM
+        function processInitTipeKelas() {
+            if (!confirm('Proses ini akan mengisi tipe kelas (Pagi/Sore) untuk seluruh mahasiswa yang belum memiliki tipe kelas, berdasarkan digit ke-5 NIM.\n\nLanjutkan?')) {
+                return;
+            }
+
+            $.ajax({
+                url: '{{ route("admin.mahasiswa.init-tipe-kelas") }}',
+                type: 'POST',
+                data: { _token: '{{ csrf_token() }}' },
+                beforeSend: function () {
+                    // Disable button to prevent double-click
+                    $('.btn-outline-warning').prop('disabled', true).html('<i class="ri-loader-4-line ri-16px me-sm-1 spin"></i> Memproses...');
+                },
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        location.reload();
+                    } else {
+                        alert('Gagal: ' + response.message);
+                    }
+                },
+                error: function (xhr) {
+                    let msg = 'Terjadi kesalahan server.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = xhr.responseJSON.message;
+                    }
+                    alert(msg);
+                },
+                complete: function () {
+                    $('.btn-outline-warning').prop('disabled', false).html('<i class="ri-refresh-line ri-16px me-sm-1"></i> Inisialisasi Tipe Kelas');
+                }
+            });
+        }
     </script>
 @endpush
