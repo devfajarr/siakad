@@ -91,6 +91,63 @@ class KartuUjianController extends Controller
                 return back()->with('info', 'Permintaan cetak sudah diajukan sebelumnya.');
             }
 
+            // ==========================================
+            // GATEKEEPING KUESIONER BPMI
+            // ==========================================
+            $semesterId = $peserta->jadwalUjian->id_semester;
+
+            // 1. Cek Kuesioner Pelayanan Akademik
+            $kuesionerPelayanan = \App\Models\Kuisioner::where('id_semester', $semesterId)
+                ->where('target_ujian', $tipeUjian)
+                ->where('tipe', 'pelayanan')
+                ->where('status', 'published')
+                ->get();
+
+            foreach ($kuesionerPelayanan as $kp) {
+                $sudahIsi = \App\Models\KuisionerSubmission::where('id_kuisioner', $kp->id)
+                    ->where('id_mahasiswa', $mahasiswa->id)
+                    ->exists();
+
+                if (!$sudahIsi) {
+                    return back()->with('error', "Akses Dilarang: Anda diwajibkan mengisi Kuesioner Pelayanan '{$kp->judul}' terlebih dahulu sebelum dapat mencetak kartu {$tipeUjian}.");
+                }
+            }
+
+            // 2. Cek Kuesioner Kinerja Dosen
+            $kuesionerDosen = \App\Models\Kuisioner::where('id_semester', $semesterId)
+                ->where('target_ujian', $tipeUjian)
+                ->where('tipe', 'dosen')
+                ->where('status', 'published')
+                ->get();
+
+            if ($kuesionerDosen->isNotEmpty()) {
+                // Kumpulkan ID Kelas yang diambil mahasiswa di semester aktif
+                $idKelasDiambil = \App\Models\PesertaKelasKuliah::whereIn('riwayat_pendidikan_id', $riwayatIds)
+                    ->whereHas('kelasKuliah', function ($q) use ($semesterId) {
+                        $q->where('id_semester', $semesterId);
+                    })->pluck('id_kelas_kuliah');
+
+                // Hitung total individu dosen (Utama + Alias) yang terlibat di kelas-kelas tersebut
+                $countDosenTarget = \App\Models\DosenPengajarKelasKuliah::whereIn('id_kelas_kuliah', $idKelasDiambil)->count();
+
+                if ($countDosenTarget > 0) {
+                    foreach ($kuesionerDosen as $kd) {
+                        $countSubmitDosen = \App\Models\KuisionerSubmission::where('id_kuisioner', $kd->id)
+                            ->where('id_mahasiswa', $mahasiswa->id)
+                            ->whereNotNull('id_kelas_kuliah')
+                            ->whereNotNull('id_dosen') // Validasi per individu dosen
+                            ->count();
+
+                        if ($countSubmitDosen < $countDosenTarget) {
+                            return back()->with('error', "Akses Dilarang: Anda belum mengevaluasi seluruh dosen pengampu pada formulir '{$kd->judul}'. (Telah selesai: {$countSubmitDosen} dari {$countDosenTarget} Pengajar). Segera lengkapi untuk membuka akses cetak {$tipeUjian}.");
+                        }
+                    }
+                }
+            }
+            // ==========================================
+            // END GATEKEEPING
+            // ==========================================
+
             $peserta->update([
                 'status_cetak' => PesertaUjian::CETAK_DIMINTA,
                 'diminta_pada' => now(),

@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class Dosen extends Model
 {
@@ -89,6 +92,14 @@ class Dosen extends Model
     }
 
     /**
+     * Relasi ke Jabatan BPMI.
+     */
+    public function bpmi()
+    {
+        return $this->hasOne(Bpmi::class, 'id_dosen');
+    }
+
+    /**
      * Relasi ke Pembimbing Akademik (Bridge).
      */
     public function pembimbingAkademik(): HasMany
@@ -164,5 +175,45 @@ class Dosen extends Model
         }
 
         return $namaAsli;
+    }
+
+    /**
+     * Helper Method: Memastikan Dosen memiliki User Login.
+     * Dipanggil oleh DosenObserver ATAU Observer Jabatan (BPMI, Kaprodi, PA).
+     */
+    public function generateUserIfNotExists()
+    {
+        // 1. Cek apakah sudah terhubung dengan User
+        if ($this->akun) {
+            return $this->akun;
+        }
+
+        // 2. Tentukan Login ID (Username/Password Default)
+        $loginId = $this->nidn ?? $this->nip ?? strtolower(Str::random(10));
+        $email = $this->email ?? ($loginId . '@polsa.ac.id');
+
+        // 3. Cek eksistensi User berdasarkan kredensial yang mirip di database
+        $user = User::where('username', $loginId)
+            ->orWhere('email', $email)
+            ->first();
+
+        // 4. Jika tetap tidak ada, Buat User Baru
+        if (!$user) {
+            $user = User::create([
+                'name' => $this->nama,
+                'username' => $loginId,
+                'email' => $email,
+                'password' => Hash::make($loginId), // Default pass
+            ]);
+        }
+
+        // 5. Sambungkan user ke entitas dosen ini dan simpan
+        $this->updateQuietly(['user_id' => $user->id]);
+
+        // 6. Pasang Base Role 'Dosen'
+        $roleDosen = Role::firstOrCreate(['name' => 'Dosen']);
+        $user->assignRole($roleDosen);
+
+        return $user;
     }
 }

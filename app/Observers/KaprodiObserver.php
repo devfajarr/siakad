@@ -11,10 +11,12 @@ class KaprodiObserver
      */
     public function created(Kaprodi $kaprodi): void
     {
-        $user = $kaprodi->dosen->akun;
+        // Auto Generate User Jika Belum Punya Akses
+        $user = $kaprodi->dosen->generateUserIfNotExists();
+
         if ($user && !$user->hasRole('Kaprodi')) {
             $user->assignRole('Kaprodi');
-            \Illuminate\Support\Facades\Log::info("SYNC_ROLE: User {$user->username} diberikan role 'Kaprodi' secara otomatis.");
+            \Illuminate\Support\Facades\Log::info("SYNC_ROLE: User {$user->username} diberikan role 'Kaprodi' karena jabatan.");
         }
     }
 
@@ -36,11 +38,12 @@ class KaprodiObserver
                 }
             }
 
-            // Handle New Dosen (Assign)
-            $user = $kaprodi->dosen->akun;
+            // Handle New Dosen (Assign & Auto Generate User)
+            $user = $kaprodi->dosen->generateUserIfNotExists();
+
             if ($user && !$user->hasRole('Kaprodi')) {
                 $user->assignRole('Kaprodi');
-                \Illuminate\Support\Facades\Log::info("SYNC_ROLE: User {$user->username} diberikan role 'Kaprodi' secara otomatis.");
+                \Illuminate\Support\Facades\Log::info("SYNC_ROLE: User {$user->username} diberikan role 'Kaprodi' akibat pergantian jabatan.");
             }
         }
     }

@@ -21,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Dosen::observe(\App\Observers\DosenObserver::class);
         \App\Models\Kaprodi::observe(\App\Observers\KaprodiObserver::class);
         \App\Models\Mahasiswa::observe(\App\Observers\MahasiswaObserver::class);
+        \App\Models\Bpmi::observe(\App\Observers\BpmiObserver::class);
         \Illuminate\Pagination\Paginator::useBootstrapFive();
 
         \Illuminate\Support\Facades\Gate::define('is-academic-advisor', function (\App\Models\User $user) {
@@ -37,6 +38,13 @@ class AppServiceProvider extends ServiceProvider
                 return false;
             }
             return \App\Models\Kaprodi::where('dosen_id', $user->dosen->id)->exists();
+        });
+
+        \Illuminate\Support\Facades\Gate::define('is-bpmi', function (\App\Models\User $user) {
+            if (!$user->dosen) {
+                return false;
+            }
+            return \App\Models\Bpmi::where('id_dosen', $user->dosen->id)->where('is_active', true)->exists();
         });
     }
 }

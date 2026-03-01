@@ -118,6 +118,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('kaprodi/search-dosen', [\App\Http\Controllers\Admin\KaprodiController::class, 'searchDosen'])->name('kaprodi.search-dosen');
     Route::resource('kaprodi', \App\Http\Controllers\Admin\KaprodiController::class);
 
+    // Manajemen BPMI
+    Route::get('bpmi/search-dosen', [\App\Http\Controllers\Admin\BpmiController::class, 'searchDosen'])->name('bpmi.search-dosen');
+    Route::resource('bpmi', \App\Http\Controllers\Admin\BpmiController::class)->only(['index', 'store', 'destroy']);
+
+    // --- Modul Kuesioner BPMI (Ditunda Ekstrak di Akhir File) ---
+
     // Rekapitulasi Nilai (Phase 1 & 2)
     Route::controller(\App\Http\Controllers\Admin\RekapNilaiController::class)->prefix('rekap-nilai')->name('rekap-nilai.')->group(function () {
         Route::get('/', 'index')->name('index');
@@ -219,6 +225,11 @@ Route::middleware(['auth', 'role:Mahasiswa'])->prefix('mahasiswa')->name('mahasi
     // Kartu Ujian
     Route::get('ujian', [\App\Http\Controllers\Mahasiswa\KartuUjianController::class, 'index'])->name('ujian.index');
     Route::post('ujian/ajukan-cetak/{pesertaUjianId}', [\App\Http\Controllers\Mahasiswa\KartuUjianController::class, 'ajukanCetak'])->name('ujian.ajukan-cetak');
+
+    // Kuesioner Mahasiswa
+    Route::get('kuisioner', [\App\Http\Controllers\Mahasiswa\KuisionerController::class, 'index'])->name('kuisioner.index');
+    Route::get('kuisioner/{kuisioner}', [\App\Http\Controllers\Mahasiswa\KuisionerController::class, 'show'])->name('kuisioner.show');
+    Route::post('kuisioner/{kuisioner}', [\App\Http\Controllers\Mahasiswa\KuisionerController::class, 'store'])->name('kuisioner.store');
 });
 
 Route::middleware(['auth', 'role:Dosen'])->prefix('dosen')->name('dosen.')->group(function () {
@@ -253,6 +264,15 @@ Route::middleware(['auth', 'role:Dosen'])->prefix('dosen')->name('dosen.')->grou
         Route::post('/ajax-convert', [\App\Http\Controllers\Dosen\InputNilaiController::class, 'convert'])->name('ajax-convert');
     });
 });
+
+
+// ------------------------------------------------------------------------------------------------- //
+// --- Modul Kuesioner (Hak Akses Bersama: Administrator dan Tim Penjamin Mutu Internal / BPMI) --- //
+Route::middleware(['auth', 'role:admin|BPMI|bpmi'])->prefix('dosen')->name('dosen.')->group(function () {
+    Route::resource('kuisioner', App\Http\Controllers\Admin\KuisionerController::class);
+    Route::post('kuisioner/{kuisioner}/sync-pertanyaan', [App\Http\Controllers\Admin\KuisionerController::class, 'syncPertanyaan'])->name('kuisioner.pertanyaan.sync');
+});
+// ------------------------------------------------------------------------------------------------- //
 
 
 require __DIR__ . '/auth.php';

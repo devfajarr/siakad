@@ -132,6 +132,12 @@
                     <div data-i18n="Kaprodi">Kaprodi</div>
                 </a>
             </li>
+            <li class="menu-item {{ request()->routeIs('admin.bpmi.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.bpmi.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-shield-check-line"></i>
+                    <div data-i18n="BPMI">Anggota BPMI</div>
+                </a>
+            </li>
             <li class="menu-item {{ request()->routeIs('admin.pembimbing-akademik.*') ? 'active' : '' }}">
                 <a href="{{ route('admin.pembimbing-akademik.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-user-settings-line"></i>
@@ -163,9 +169,24 @@
             </li>
             <li class="menu-item {{ request()->routeIs('admin.pengaturan-ujian.*') ? 'active' : '' }}">
                 <a href="{{ route('admin.pengaturan-ujian.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ri-time-zone-line"></i>
+                    <i class="menu-icon tf-icons ri-settings-5-line"></i>
                     <div data-i18n="Pengaturan Ujian">Pengaturan Ujian</div>
                 </a>
+            </li>
+
+            <!-- Manajemen Kuisioner (BPMI / Admin) -->
+            <li class="menu-item {{ request()->routeIs('dosen.kuisioner.*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons ri-survey-line"></i>
+                    <div data-i18n="Kuisioner BPMI">Kuisioner BPMI</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('dosen.kuisioner.index') ? 'active' : '' }}">
+                        <a href="{{ route('dosen.kuisioner.index') }}" class="menu-link">
+                            <div data-i18n="Master Kuisioner">Master Form</div>
+                        </a>
+                    </li>
+                </ul>
             </li>
             <li class="menu-item {{ request()->routeIs('admin.ruangan.*') ? 'active' : '' }}">
                 <a href="{{ route('admin.ruangan.index') }}" class="menu-link">
@@ -266,13 +287,30 @@
                         <div data-i18n="Monitoring Dosen Pengajar">Monitoring Dosen Pengajar</div>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a href="#" class="menu-link">
-                        <i class="menu-icon tf-icons ri-file-list-3-line"></i>
-                        <div data-i18n="Persetujuan KRS">Persetujuan KRS</div>
+
+            @endif
+
+            {{-- ── Ruang Badan Mutu (BPMI) ────────────────────── --}}
+            @if(auth()->user()->hasAnyRole(['BPMI', 'bpmi']))
+                <li class="menu-header mt-5 small text-uppercase">
+                    <span class="menu-header-text">Ruang Badan Mutu</span>
+                </li>
+                <!-- Manajemen Kuisioner (BPMI / Admin) -->
+                <li class="menu-item {{ request()->routeIs('dosen.kuisioner.*') ? 'active open' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons ri-survey-line"></i>
+                        <div data-i18n="Kuisioner BPMI">Kuisioner BPMI</div>
                     </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item {{ request()->routeIs('dosen.kuisioner.index') ? 'active' : '' }}">
+                            <a href="{{ route('dosen.kuisioner.index') }}" class="menu-link">
+                                <div data-i18n="Master Kuisioner">Master Form</div>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             @endif
+
         @elseif(session('active_role') == 'Mahasiswa')
             <li class="menu-header mt-5 small text-uppercase">
                 <span class="menu-header-text">Ruang Mahasiswa</span>
@@ -303,8 +341,14 @@
             </li>
             <li class="menu-item {{ request()->routeIs('mahasiswa.ujian.*') ? 'active' : '' }}">
                 <a href="{{ route('mahasiswa.ujian.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ri-survey-line"></i>
+                    <i class="menu-icon tf-icons ri-file-list-3-line"></i>
                     <div data-i18n="Kartu Ujian">Kartu Ujian</div>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('mahasiswa.kuisioner.*') ? 'active' : '' }}">
+                <a href="{{ route('mahasiswa.kuisioner.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-survey-line"></i>
+                    <div data-i18n="Isi Kuesioner">Isi Kuesioner</div>
                 </a>
             </li>
         @endif

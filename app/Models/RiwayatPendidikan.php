@@ -90,4 +90,12 @@ class RiwayatPendidikan extends Model
     {
         return $this->hasMany(PresensiMahasiswa::class, 'riwayat_pendidikan_id');
     }
+
+    /**
+     * Relasi ke Peserta Kelas Kuliah.
+     */
+    public function pesertaKelasKuliahs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(PesertaKelasKuliah::class, 'riwayat_pendidikan_id');
+    }
 }
