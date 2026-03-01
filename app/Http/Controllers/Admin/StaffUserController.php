@@ -40,7 +40,7 @@ class StaffUserController extends Controller
             $query->role($request->role);
         }
 
-        $users = $query->paginate(15)->withQueryString();
+        $users = $query->paginate(10)->withQueryString();
         $allRoles = Role::where('name', '!=', 'Mahasiswa')->pluck('name', 'id');
 
         return view('admin.manajemen_dosen.index', compact('users', 'allRoles'));

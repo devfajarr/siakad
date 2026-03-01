@@ -74,10 +74,34 @@
                     <div data-i18n="Data Mahasiswa">Data Mahasiswa</div>
                 </a>
             </li>
-            <li class="menu-item {{ request()->routeIs('admin.dosen.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.dosen.index') }}" class="menu-link">
+            <li
+                class="menu-item {{ request()->routeIs(['admin.dosen.*', 'admin.direktur.*', 'admin.wakil-direktur.*']) ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons ri-user-line"></i>
-                    <div data-i18n="Data Dosen">Data Dosen</div>
+                    <div data-i18n="Dosen & Direksi">Dosen & Direksi</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('admin.dosen.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.dosen.index') }}" class="menu-link">
+                            <div data-i18n="Daftar Dosen">Daftar Dosen</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('admin.direktur.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.direktur.index') }}" class="menu-link">
+                            <div data-i18n="Direktur">Direktur</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('admin.wakil-direktur.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.wakil-direktur.index') }}" class="menu-link">
+                            <div data-i18n="Wakil Direktur">Wakil Direktur</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="menu-item {{ request()->routeIs('admin.pegawai.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.pegawai.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-user-settings-line"></i>
+                    <div data-i18n="Data Pegawai">Data Pegawai</div>
                 </a>
             </li>
 
@@ -142,6 +166,30 @@
                 <a href="{{ route('admin.pembimbing-akademik.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ri-user-settings-line"></i>
                     <div data-i18n="Dosen PA">Dosen PA</div>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('admin.sarpras.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.sarpras.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-tools-line"></i>
+                    <div data-i18n="Sarpras">Sarpras</div>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('admin.perpustakaan.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.perpustakaan.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-book-line"></i>
+                    <div data-i18n="Perpustakaan">Perpustakaan</div>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('admin.personalia.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.personalia.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-team-line"></i>
+                    <div data-i18n="Personalia">Personalia</div>
+                </a>
+            </li>
+            <li class="menu-item {{ request()->routeIs('admin.kemahasiswaan.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.kemahasiswaan.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-graduation-cap-line"></i>
+                    <div data-i18n="Kemahasiswaan">Kemahasiswaan</div>
                 </a>
             </li>
 
@@ -281,12 +329,7 @@
                         <div data-i18n="Monitoring Perkuliahan">Monitoring Perkuliahan</div>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a href="#" class="menu-link">
-                        <i class="menu-icon tf-icons ri-team-line"></i>
-                        <div data-i18n="Monitoring Dosen Pengajar">Monitoring Dosen Pengajar</div>
-                    </a>
-                </li>
+
 
             @endif
 

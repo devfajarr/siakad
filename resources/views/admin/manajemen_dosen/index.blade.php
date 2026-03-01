@@ -32,7 +32,10 @@
                         <select name="role" id="role" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="">-- Semua Jabatan --</option>
                             @foreach($allRoles as $id => $name)
-                                <option value="{{ $name }}" {{ request('role') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                                @php
+                                    $displayName = $name == 'pembimbing_akademik' ? 'Dosen PA' : ucwords(str_replace('_', ' ', $name));
+                                @endphp
+                                <option value="{{ $name }}" {{ request('role') == $name ? 'selected' : '' }}>{{ $displayName }}</option>
                             @endforeach
                         </select>
                     </form>
@@ -61,7 +64,10 @@
                             </td>
                             <td>
                                 @forelse($user->roles as $role)
-                                    <span class="badge rounded-pill bg-label-primary me-1 mb-1">{{ $role->name }}</span>
+                                    @php
+                                        $displayName = $role->name == 'pembimbing_akademik' ? 'Dosen PA' : ucwords(str_replace('_', ' ', $role->name));
+                                    @endphp
+                                    <span class="badge rounded-pill bg-label-primary me-1 mb-1">{{ $displayName }}</span>
                                 @empty
                                     <span class="text-muted fst-italic">Belum ada jabatan</span>
                                 @endforelse
@@ -93,7 +99,7 @@
                 </table>
             </div>
             <div class="card-footer pb-0">
-                {{ $users->links() }}
+                 {{ $users->links() }}
             </div>
         </div>
     </div>
@@ -120,10 +126,13 @@
                                 @forelse($allRoles as $roleId => $roleName)
                                     <div class="col-md-6 mb-2">
                                         <div class="form-check form-check-inline mt-2">
+                                            @php
+                                                $displayName = $roleName == 'pembimbing_akademik' ? 'Dosen PA' : ucwords(str_replace('_', ' ', $roleName));
+                                            @endphp
                                             <input class="form-check-input" type="checkbox" id="role_{{ $user->id }}_{{ $roleId }}" 
                                                 name="roles[]" value="{{ $roleName }}"
                                                 {{ $user->hasRole($roleName) ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="role_{{ $user->id }}_{{ $roleId }}">{{ $roleName }}</label>
+                                            <label class="form-check-label" for="role_{{ $user->id }}_{{ $roleId }}">{{ $displayName }}</label>
                                         </div>
                                     </div>
                                 @empty

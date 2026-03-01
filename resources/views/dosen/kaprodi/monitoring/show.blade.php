@@ -56,8 +56,9 @@
         <!-- Jurnal / Berita Acara -->
         <div class="col-xl-7 col-lg-7">
             <div class="card mb-4">
-                <div class="card-header border-bottom d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Jurnal Perkuliahan (Dosen)</h5>
+                <div class="card-header border-bottom d-flex justify-content-between align-items-center bg-label-primary">
+                    <h5 class="card-title mb-0 text-primary"><i class="ri-book-read-line me-2"></i>Jurnal Perkuliahan
+                        (Dosen)</h5>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover">
@@ -141,7 +142,25 @@
                     </div>
                 </div>
                 <div class="card-footer bg-label-light">
-                    <small class="text-muted italic">* Mahasiswa dengan kehadiran < 75% ditandai merah.</small>
+                    <small class="text-muted fst-italic">* Mahasiswa dengan kehadiran < 75% ditandai merah.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Feedback / Umpan Balik -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header border-bottom bg-label-info">
+                    <h5 class="card-title mb-0 text-info"><i class="ri-feedback-line me-2"></i>Umpan Balik / Komplain
+                        Mahasiswa</h5>
+                </div>
+                <div class="card-body py-5 text-center">
+                    <i class="ri-chat-voice-line ri-4x text-muted mb-3 d-block"></i>
+                    <h6 class="text-muted">Modul Umpan Balik Mahasiswa Belum Tersedia</h6>
+                    <p class="text-muted mb-0">Fitur komplain / feedback per pertemuan akan segera hadir pada pembaruan
+                        SIAKAD berikutnya.</p>
                 </div>
             </div>
         </div>

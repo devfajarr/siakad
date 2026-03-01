@@ -122,6 +122,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('bpmi/search-dosen', [\App\Http\Controllers\Admin\BpmiController::class, 'searchDosen'])->name('bpmi.search-dosen');
     Route::resource('bpmi', \App\Http\Controllers\Admin\BpmiController::class)->only(['index', 'store', 'destroy']);
 
+    // Manajemen Jabatan Tambahan (Multi-Role Hybrid & Dosen)
+    Route::resource('sarpras', \App\Http\Controllers\Admin\Jabatan\SarprasController::class)->except(['create', 'edit', 'show']);
+    Route::resource('perpustakaan', \App\Http\Controllers\Admin\Jabatan\PerpustakaanController::class)->except(['create', 'edit', 'show']);
+    Route::resource('personalia', \App\Http\Controllers\Admin\Jabatan\PersonaliaController::class)->except(['create', 'edit', 'show']);
+    Route::resource('kemahasiswaan', \App\Http\Controllers\Admin\Jabatan\KemahasiswaanController::class)->except(['create', 'edit', 'show']);
+    Route::resource('direktur', \App\Http\Controllers\Admin\Jabatan\DirekturController::class)->except(['create', 'edit', 'show']);
+    Route::resource('wakil-direktur', \App\Http\Controllers\Admin\Jabatan\WakilDirekturController::class)->except(['create', 'edit', 'show']);
+
     // --- Modul Kuesioner BPMI (Ditunda Ekstrak di Akhir File) ---
 
     // Rekapitulasi Nilai (Phase 1 & 2)
@@ -163,6 +171,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         'store' => 'admin.ruangan.store',
         'update' => 'admin.ruangan.update',
         'destroy' => 'admin.ruangan.destroy',
+    ]);
+
+    // Route Manajemen Pegawai
+    Route::resource('pegawai', \App\Http\Controllers\Admin\PegawaiController::class)->except(['create', 'show', 'edit'])->names([
+        'index' => 'admin.pegawai.index',
+        'store' => 'admin.pegawai.store',
+        'update' => 'admin.pegawai.update',
+        'destroy' => 'admin.pegawai.destroy',
     ]);
 
     // Manajemen Jadwal Terpadu (Admin)

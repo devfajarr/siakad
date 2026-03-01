@@ -115,6 +115,14 @@ class KelasKuliah extends Model
     }
 
     /**
+     * Scope: Hanya data spesifik milik id_prodi tertentu.
+     */
+    public function scopeMilikProdi($query, array $prodiIds)
+    {
+        return $query->whereIn('id_prodi', $prodiIds);
+    }
+
+    /**
      * Scope: Data yang pending untuk di-push ke server.
      */
     public function scopePendingPush($query)

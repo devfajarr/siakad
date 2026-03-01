@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Monitoring Perkuliahan')
+@section('title', 'Monitoring Perkuliahan Kaprodi')
 
 @section('content')
     <div class="d-flex align-items-center justify-content-between mb-4">
@@ -8,201 +8,178 @@
             <span class="text-muted fw-light">Kaprodi /</span> Monitoring Perkuliahan
         </h4>
         <div class="text-end">
-            <h6 class="mb-0 fw-bold">
+            <h6 class="mb-0 fw-bold text-primary">
                 {{ $kaprodiEntries->map(fn($e) => $e->prodi->nama_program_studi)->implode(' & ') }}
             </h6>
-            <small class="text-muted">Semester: {{ $selectedSemester->nama_semester }}</small>
         </div>
     </div>
 
     <!-- Stats Overview -->
     <div class="row g-4 mb-4">
         <div class="col-sm-6 col-xl-4">
-            <div class="card">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="content-left">
-                            <span class="text-heading">Total Kelas</span>
-                            <div class="d-flex align-items-center my-1">
-                                <h4 class="mb-0 me-2">{{ $totalKelas }}</h4>
-                                <small class="text-success">(Semester Aktif)</small>
-                            </div>
-                            <small class="mb-0">Kelas terdaftar di prodi</small>
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="avatar me-3">
+                            <span class="avatar-initial rounded bg-label-primary"><i class="ri-book-open-line"></i></span>
                         </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-primary">
-                                <i class="ri-artboard-line ri-24px"></i>
-                            </span>
-                        </div>
+                        <h4 class="mb-0">{{ $stats['total_kelas'] }}</h4>
                     </div>
+                    <p class="mb-0 text-muted fst-italic">Total Kelas Aktif (Prodi Saya)</p>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-4">
-            <div class="card">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="content-left">
-                            <span class="text-heading">Total Mahasiswa</span>
-                            <div class="d-flex align-items-center my-1">
-                                <h4 class="mb-0 me-2">{{ $totalMahasiswa }}</h4>
-                                <small class="text-success">(Aktif KRS)</small>
-                            </div>
-                            <small class="mb-0">Mahasiswa prodi terdaftar</small>
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="avatar me-3">
+                            <span class="avatar-initial rounded bg-label-success"><i
+                                    class="ri-checkbox-circle-line"></i></span>
                         </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-success">
-                                <i class="ri-group-line ri-24px"></i>
-                            </span>
-                        </div>
+                        <h4 class="mb-0">{{ $stats['selesai'] }}</h4>
                     </div>
+                    <p class="mb-0 text-muted fst-italic">Selesai (>= {{ config('academic.target_pertemuan', 14) - 1 }}
+                        Pertemuan)</p>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-4">
-            <div class="card">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="content-left">
-                            <span class="text-heading">Rata-rata Progres</span>
-                            <div class="d-flex align-items-center my-1">
-                                <h4 class="mb-0 me-2">{{ number_format($avgProgres, 1) }}%</h4>
-                                <small class="text-primary">(Global)</small>
-                            </div>
-                            <small class="mb-0">Realisasi pertemuan (Target 14)</small>
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="avatar me-3">
+                            <span class="avatar-initial rounded bg-label-danger"><i
+                                    class="ri-error-warning-line"></i></span>
                         </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-info">
-                                <i class="ri-line-chart-line ri-24px"></i>
-                            </span>
-                        </div>
+                        <h4 class="mb-0">{{ $stats['tertinggal'] }}</h4>
                     </div>
+                    <p class="mb-0 text-muted fst-italic">Butuh Perhatian (< {{ (config('academic.target_pertemuan', 14) / 2) }} Pertemuan)</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Monitoring Table -->
-    <div class="card">
-        <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
             <h5 class="card-title mb-0">Daftar Progres Perkuliahan</h5>
-            <div class="d-flex gap-2">
-                <form action="{{ route('dosen.monitoring-kaprodi.index') }}" method="GET" class="d-flex gap-2">
-                    <select name="semester_id" class="form-select form-select-sm" onchange="this.form.submit()"
-                        style="min-width: 200px;">
-                        @foreach($availableSemesters as $semester)
-                            <option value="{{ $semester->id_semester }}" {{ $selectedSemester->id_semester == $semester->id_semester ? 'selected' : '' }}>
-                                {{ $semester->nama_semester }}
+            <div class="d-flex align-items-center gap-3">
+                <form action="{{ route('dosen.monitoring-kaprodi.index') }}" method="GET"
+                    class="d-flex align-items-center gap-2">
+                    @if($semesterId)
+                        <input type="hidden" name="semester_id" value="{{ $semesterId }}">
+                    @endif
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="search" class="form-control" placeholder="Cari MK, Dosen, atau Prodi..."
+                            value="{{ $search }}">
+                        <button type="submit" class="btn btn-primary">Cari</button>
+                    </div>
+                </form>
+
+                <form action="{{ route('dosen.monitoring-kaprodi.index') }}" method="GET"
+                    class="d-flex align-items-center gap-2">
+                    @if($search)
+                        <input type="hidden" name="search" value="{{ $search }}">
+                    @endif
+                    <label for="semester_id" class="form-label mb-0 text-nowrap">Semester:</label>
+                    <select name="semester_id" id="semester_id" class="form-select form-select-sm"
+                        onchange="this.form.submit()">
+                        @foreach($semesters as $sem)
+                            <option value="{{ $sem->id_semester }}" {{ $semesterId == $sem->id_semester ? 'selected' : '' }}>
+                                {{ $sem->nama_semester }}
                             </option>
                         @endforeach
                     </select>
                 </form>
-
-                @if($kaprodiEntries->count() > 1)
-                    <select class="form-select form-select-sm" id="prodiFilter" style="min-width: 200px;">
-                        <option value="">Semua Program Studi</option>
-                        @foreach($kaprodiEntries as $entry)
-                            <option value="{{ $entry->prodi->nama_program_studi }}">
-                                {{ $entry->prodi->nama_program_studi }}
-                            </option>
-                        @endforeach
-                    </select>
-                @endif
             </div>
         </div>
-        <div class="card-datatable table-responsive">
-            <table class="table table-hover border-top" id="tableMonitoring">
-                <thead>
+        <div class="table-responsive pt-2 pb-2 text-nowrap">
+            <table class="table table-hover align-middle mb-0 datatables-monitoring">
+                <thead class="table-light">
                     <tr>
-                        <th>Mata Kuliah</th>
+                        <th width="50px">No</th>
                         <th>Program Studi</th>
+                        <th>Mata Kuliah</th>
+                        <th>Kelas</th>
                         <th>Dosen Pengampu</th>
-                        <th class="text-center">Pertemuan (14)</th>
-                        <th>Progres</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
+                        <th class="text-center">Progres</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($kelasData as $kelas)
+                    @forelse($kelasKuliahs as $index => $kelas)
                         <tr>
+                            <td>{{ $kelasKuliahs->firstItem() + $index }}</td>
+                            <td><small>{{ $kelas->programStudi->nama_program_studi ?? '-' }}</small></td>
                             <td>
-                                <div class="d-flex flex-column">
-                                    <span class="fw-bold text-heading">{{ $kelas['nama_mk'] }}</span>
-                                    <small class="text-muted">{{ $kelas['kode_mk'] }} - {{ $kelas['nama_kelas'] }}</small>
+                                <div class="fw-semibold text-primary">
+                                    {{ $kelas->mataKuliah->nama_mk ?? 'Matkul Tidak Ditemukan' }}
                                 </div>
+                                <small class="text-muted">{{ $kelas->mataKuliah->kode_mk ?? '-' }}</small>
                             </td>
-                            <td data-search="{{ $kelas['prodi'] }}">
-                                <span class="badge bg-label-secondary">{{ $kelas['prodi'] }}</span>
-                            </td>
-                            <td>{{ $kelas['dosen'] }}</td>
-                            <td class="text-center">
-                                <span class="badge rounded-pill bg-label-primary">
-                                    {{ $kelas['pertemuan_count'] ?? 0 }} / 14
-                                </span>
-                            </td>
-                            <td style="min-width: 150px;">
-                                <div class="d-flex align-items-center">
-                                    <div class="progress w-100 me-2" style="height: 8px;">
-                                        @php
-                                            $barClass = $kelas['progres_percent'] >= 100 ? 'bg-success' :
-                                                ($kelas['progres_percent'] >= 75 ? 'bg-info' :
-                                                    ($kelas['progres_percent'] >= 25 ? 'bg-primary' : 'bg-warning'));
-                                        @endphp
-                                        <div class="progress-bar {{ $barClass }}" role="progressbar"
-                                            style="width: {{ $kelas['progres_percent'] }}%"
-                                            aria-valuenow="{{ $kelas['progres_percent'] }}" aria-valuemin="0"
-                                            aria-valuemax="100"></div>
-                                    </div>
-                                    <small>{{ $kelas['progres_percent'] }}%</small>
-                                </div>
-                            </td>
+                            <td>{{ $kelas->nama_kelas_kuliah }}</td>
                             <td>
                                 @php
-                                    $statusClass = match ($kelas['status']) {
-                                        'Selesai' => 'bg-label-success',
-                                        'Berjalan' => 'bg-label-info',
-                                        'Mulai' => 'bg-label-primary',
-                                        default => 'bg-label-secondary'
-                                    };
+                                    $primaryDosen = $kelas->dosenPengajars->first()->nama_admin_display ?? '-';
                                 @endphp
-                                <span class="badge {{ $statusClass }}">{{ $kelas['status'] }}</span>
+                                {{ $primaryDosen }}
+                                @if($kelas->dosenPengajars->count() > 1)
+                                    <small class="text-muted text-nowrap">+{{ $kelas->dosenPengajars->count() - 1 }} Tim</small>
+                                @endif
                             </td>
-                            <td>
-                                <a href="{{ route('dosen.monitoring-kaprodi.show', $kelas['id']) }}"
+                            <td class="text-center">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <div class="progress w-100 me-2" style="height: 8px;">
+                                        <div class="progress-bar bg-{{ $kelas->status_warna }}" role="progressbar"
+                                            style="width: {{ ($kelas->presensi_pertemuans_count / config('academic.target_pertemuan', 14)) * 100 }}%"
+                                            aria-valuenow="{{ $kelas->presensi_pertemuans_count }}" aria-valuemin="0"
+                                            aria-valuemax="{{ config('academic.target_pertemuan', 14) }}"></div>
+                                    </div>
+                                    <span
+                                        class="fw-bold">{{ $kelas->presensi_pertemuans_count }}/{{ config('academic.target_pertemuan', 14) }}</span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-label-{{ $kelas->status_warna }}">{{ $kelas->status_label }}</span>
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ route('dosen.monitoring-kaprodi.show', $kelas->id_kelas_kuliah) }}"
                                     class="btn btn-sm btn-icon btn-text-secondary rounded-pill" data-bs-toggle="tooltip"
                                     title="Lihat Jurnal & Presensi">
                                     <i class="ri-eye-line ri-20px"></i>
                                 </a>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <p class="text-muted">Data tidak ditemukan.</p>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
+        </div>
+        <div class="card-footer pb-4">
+            {{ $kelasKuliahs->links() }}
         </div>
     </div>
 @endsection
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
-@endpush
-
 @push('scripts')
-    <script src="{{ asset('assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') }}"></script>
     <script>
         $(function () {
-            if ($.fn.DataTable) {
-                var table = $('#tableMonitoring').DataTable({
-                    order: [[4, 'desc']], // Urutkan berdasarkan progres tertinggi (sekarang index 4)
-                    language: {
-                        searchPlaceholder: 'Cari Kelas/Dosen...',
-                        sLengthMenu: '_MENU_',
-                    }
-                });
-
-                $('#prodiFilter').on('change', function () {
-                    var val = $(this).val();
-                    table.column(1).search(val).draw();
+            var dt_monitoring = $('.datatables-monitoring');
+            if (dt_monitoring.length) {
+                dt_monitoring.DataTable({
+                    responsive: false,
+                    scrollX: true,
+                    dom: 't', // Only show table, hide internal search/pagination
+                    paging: false,
+                    searching: false,
+                    info: false
                 });
             }
         });

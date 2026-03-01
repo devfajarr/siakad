@@ -22,6 +22,14 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Kaprodi::observe(\App\Observers\KaprodiObserver::class);
         \App\Models\Mahasiswa::observe(\App\Observers\MahasiswaObserver::class);
         \App\Models\Bpmi::observe(\App\Observers\BpmiObserver::class);
+        \App\Models\Pegawai::observe(\App\Observers\PegawaiObserver::class);
+        \App\Models\Sarpras::observe(\App\Observers\SarprasObserver::class);
+        \App\Models\Perpustakaan::observe(\App\Observers\PerpustakaanObserver::class);
+        \App\Models\Personalia::observe(\App\Observers\PersonaliaObserver::class);
+        \App\Models\Kemahasiswaan::observe(\App\Observers\KemahasiswaanObserver::class);
+        \App\Models\Direktur::observe(\App\Observers\DirekturObserver::class);
+        \App\Models\WakilDirektur::observe(\App\Observers\WakilDirekturObserver::class);
+
         \Illuminate\Pagination\Paginator::useBootstrapFive();
 
         \Illuminate\Support\Facades\Gate::define('is-academic-advisor', function (\App\Models\User $user) {

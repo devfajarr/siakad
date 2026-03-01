@@ -9,7 +9,6 @@ use App\Models\Semester;
 use App\Models\KelasKuliah;
 use App\Models\PesertaKelasKuliah;
 use App\Models\PresensiPertemuan;
-use Illuminate\Support\Facades\DB;
 
 class MonitoringController extends Controller
 {
@@ -27,84 +26,94 @@ class MonitoringController extends Controller
 
         $prodiIds = $kaprodiEntries->pluck('id_prodi')->toArray();
 
-        // Cari semester aktif global sebagai batas atas
-        $globalActiveSemester = Semester::where('a_periode_aktif', '1')->first();
-        if (!$globalActiveSemester) {
-            $globalActiveSemester = Semester::orderBy('id_semester', 'desc')->first();
-        }
+        $semesterId = $request->get('semester_id', getActiveSemesterId());
+        $search = $request->get('search');
 
-        // Ambil daftar semester (aktif + lampau), sembunyikan yang akan datang
-        $availableSemesters = Semester::where('id_semester', '<=', $globalActiveSemester->id_semester)
-            ->orderBy('id_semester', 'desc')
-            ->get();
+        // Master Semester untuk filter
+        $semesters = Semester::orderBy('id_semester', 'desc')->get();
 
-        // Gunakan semester dari request atau default ke aktif
-        $selectedSemesterId = $request->input('semester_id', $globalActiveSemester->id_semester);
-        $selectedSemester = $availableSemesters->firstWhere('id_semester', $selectedSemesterId) ?: $globalActiveSemester;
+        // Statistik Widget (Discope khusus prodi)
+        $allStatsQuery = KelasKuliah::milikProdi($prodiIds)
+            ->where('id_semester', $semesterId)
+            ->withCount('presensiPertemuans');
 
-        // 1. Statistik Dasar
-        $totalKelas = KelasKuliah::whereIn('id_prodi', $prodiIds)
-            ->where('id_semester', $selectedSemester->id_semester)
-            ->count();
+        $stats = [
+            'total_kelas' => $allStatsQuery->count(),
+            'selesai' => (clone $allStatsQuery)->has('presensiPertemuans', '>=', 13)->count(),
+            'tertinggal' => (clone $allStatsQuery)->has('presensiPertemuans', '<', 7)->count(),
+        ];
 
-        $totalMahasiswa = PesertaKelasKuliah::whereHas('kelasKuliah', function ($q) use ($prodiIds, $selectedSemester) {
-            $q->whereIn('id_prodi', $prodiIds)
-                ->where('id_semester', $selectedSemester->id_semester);
-        })
-            ->where('status_krs', 'acc')
-            ->distinct('riwayat_pendidikan_id')
-            ->count('riwayat_pendidikan_id');
-
-        // 2. Agregasi Progres Kelas
-        $kelasQuery = KelasKuliah::with(['mataKuliah', 'dosenPengajar.dosen', 'programStudi'])
+        // Query Utama dengan Pencarian dan Paginasi
+        $kelasKuliahs = KelasKuliah::milikProdi($prodiIds)
+            ->where('id_semester', $semesterId)
             ->withCount('presensiPertemuans')
-            ->whereIn('id_prodi', $prodiIds)
-            ->where('id_semester', $selectedSemester->id_semester)
-            ->get();
+            ->with(['mataKuliah', 'programStudi', 'dosenPengajars.dosen', 'dosenPengajars.dosenAliasLokal'])
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('mataKuliah', function ($mq) use ($search) {
+                        $mq->where('nama_mk', 'like', "%{$search}%")
+                            ->orWhere('kode_mk', 'like', "%{$search}%");
+                    })
+                        ->orWhereHas('dosenPengajars.dosen', function ($dq) use ($search) {
+                            $dq->where('nama', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('programStudi', function ($pq) use ($search) {
+                            $pq->where('nama_program_studi', 'like', "%{$search}%");
+                        })
+                        ->orWhere('nama_kelas_kuliah', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
 
-        $avgProgres = $kelasQuery->avg(function ($kelas) {
-            return ($kelas->presensi_pertemuan_count / 14) * 100;
-        });
-
-        // 3. Mapping data untuk tabel
-        $kelasData = $kelasQuery->map(function ($kelas) {
-            $progres = ($kelas->presensi_pertemuan_count / 14) * 100;
-            return [
-                'id' => $kelas->id,
-                'kode_mk' => $kelas->mataKuliah->kode_mk ?? '-',
-                'nama_mk' => $kelas->mataKuliah->nama_mk ?? '-',
-                'nama_kelas' => $kelas->nama_kelas_kuliah,
-                'prodi' => $kelas->programStudi->nama_program_studi ?? '-',
-                'dosen' => $kelas->dosenPengajar->map(fn($d) => $d->dosen->nama_tampilan)->implode(', ') ?: '-',
-                'pertemuan_count' => $kelas->presensi_pertemuan_count,
-                'progres_percent' => round(min($progres, 100), 1),
-                'status' => $this->getStatusKelas($progres)
-            ];
+        // Tambahkan atribut visual progress bar
+        $kelasKuliahs->getCollection()->transform(function ($kelas) {
+            $progres = $kelas->presensi_pertemuans_count;
+            if ($progres < 7) {
+                $kelas->status_warna = 'danger';
+                $kelas->status_label = 'Tertinggal';
+            } elseif ($progres <= 12) {
+                $kelas->status_warna = 'warning';
+                $kelas->status_label = 'Berjalan';
+            } else {
+                $kelas->status_warna = 'success';
+                $kelas->status_label = 'Selesai/Mendekati';
+            }
+            return $kelas;
         });
 
         return view('dosen.kaprodi.monitoring.index', compact(
             'kaprodiEntries',
-            'availableSemesters',
-            'selectedSemester',
-            'totalKelas',
-            'totalMahasiswa',
-            'avgProgres',
-            'kelasData'
+            'kelasKuliahs',
+            'semesters',
+            'semesterId',
+            'stats',
+            'search'
         ));
     }
 
     public function show($id)
     {
         $dosen = auth()->user()->dosen;
-        $prodiIds = Kaprodi::where('dosen_id', $dosen->id)->pluck('id_prodi')->toArray();
+        $kaprodiEntries = Kaprodi::with('prodi')->where('dosen_id', $dosen->id)->get();
+        $prodiIds = $kaprodiEntries->pluck('id_prodi')->toArray();
 
         if (empty($prodiIds)) {
             abort(403, 'Akses ditolak: Anda bukan Kaprodi.');
         }
 
-        $kelas = KelasKuliah::with(['mataKuliah', 'dosenPengajar.dosen', 'semester'])
-            ->whereIn('id_prodi', $prodiIds)
-            ->findOrFail($id);
+        $kelas = KelasKuliah::with([
+            'mataKuliah',
+            'dosenPengajars.dosen',
+            'dosenPengajars.dosenAliasLokal',
+            'programStudi',
+            'semester'
+        ])
+            ->milikProdi($prodiIds)
+            ->withCount('presensiPertemuans')
+            ->where('id_kelas_kuliah', $id)
+            ->firstOrFail();
 
         $jurnal = PresensiPertemuan::with('dosen')
             ->where('id_kelas_kuliah', $kelas->id_kelas_kuliah)
@@ -121,15 +130,15 @@ class MonitoringController extends Controller
             $hadirCount = $p->presensiMahasiswas()->where('status', 'H')->count();
             $totalPertemuan = $jurnal->count();
             return [
-                'nama' => $p->riwayatPendidikan->mahasiswa->nama_mahasiswa,
-                'nim' => $p->riwayatPendidikan->mahasiswa->nim,
+                'nama' => $p->riwayatPendidikan->mahasiswa->nama_mahasiswa ?? '-',
+                'nim' => $p->riwayatPendidikan->mahasiswa->nim ?? '-',
                 'hadir' => $hadirCount,
                 'total' => $totalPertemuan,
                 'percent' => $totalPertemuan > 0 ? round(($hadirCount / $totalPertemuan) * 100, 1) : 0
             ];
         });
 
-        return view('dosen.kaprodi.monitoring.show', compact('kelas', 'jurnal', 'rekapAbsensi'));
+        return view('dosen.kaprodi.monitoring.show', compact('kelas', 'jurnal', 'rekapAbsensi', 'kaprodiEntries'));
     }
 
     private function getStatusKelas($progres)
