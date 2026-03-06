@@ -123,6 +123,10 @@ class KrsController extends Controller
                 ->where('status_krs', 'paket')
                 ->update(['status_krs' => 'pending']);
 
+            if ($updated > 0 && $mahasiswa->dosenPembimbing && $mahasiswa->dosenPembimbing->akun) {
+                $mahasiswa->dosenPembimbing->akun->notify(new \App\Notifications\PengajuanKrsNotification($mahasiswa, $semesterId));
+            }
+
             Log::info("CRUD_UPDATE: Mahasiswa mengajukan KRS", ['nim' => $mahasiswa->nim, 'count' => $updated]);
 
             return back()->with('success', 'KRS berhasil diajukan. Tunggu persetujuan Dosen PA.');

@@ -263,13 +263,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     });
 });
 
+// Global Notifications (All Authenticated Users)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/notifikasi', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifikasi.index');
+    Route::post('/notifikasi/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifikasi.read');
+    Route::post('/notifikasi/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifikasi.read-all');
+});
+
 Route::middleware(['auth', 'role:Mahasiswa'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Mahasiswa\DashboardController::class, 'index'])->name('dashboard');
-
-    // Notifikasi
-    Route::get('/notifikasi', [\App\Http\Controllers\Mahasiswa\NotifikasiController::class, 'index'])->name('notifikasi.index');
-    Route::post('/notifikasi/{id}/read', [\App\Http\Controllers\Mahasiswa\NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
-    Route::post('/notifikasi/read-all', [\App\Http\Controllers\Mahasiswa\NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.read-all');
 
     Route::get('/kelas', [\App\Http\Controllers\Mahasiswa\DaftarKelasMahasiswaController::class, 'index'])->name('kelas.index');
     Route::get('/kelas/{id}', [\App\Http\Controllers\Mahasiswa\DaftarKelasMahasiswaController::class, 'show'])->name('kelas.show');

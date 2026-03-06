@@ -382,7 +382,7 @@
                     <div class="fw-semibold text-muted">
                         Daftar dosen pengajar untuk kelas ini.
                         <span class="ms-2 badge bg-label-secondary">
-                            SKS Terisi: {{ number_format($activeTotalSks, 2) }} / {{ number_format($kelasKuliah->sks_mk, 2) }}
+                            SKS Terisi: {{ number_format((float) $activeTotalSks, 2) }} / {{ number_format((float) $kelasKuliah->sks_mk, 2) }}
                         </span>
                     </div>
                     <div class="d-flex gap-2">
@@ -501,7 +501,7 @@
                             <tfoot class="fw-bold bg-white">
                                 <tr>
                                     <td colspan="5" class="text-end text-uppercase py-3 pe-4">Total SKS</td>
-                                    <td class="text-center py-3">{{ number_format($activeTotalSks, 2) }}</td>
+                                    <td class="text-center py-3">{{ number_format((float) $activeTotalSks, 2) }}</td>
                                     <td colspan="4" class="bg-white border-0"></td>
                                 </tr>
                             </tfoot>
@@ -662,7 +662,7 @@
                                     </td>
                                     <td>{{ $index + 1 }}</td>
                                     <td><span class="fw-semibold text-primary w-100 d-block">{{ $peserta->riwayatPendidikan->nim ?? '-' }}</span></td>
-                                    <td class="text-start fw-medium">{{ $mhs->nama ?? 'Unknown' }}</td>
+                                    <td class="text-start fw-medium">{{ $mhs->nama_mahasiswa ?? 'Unknown' }}</td>
                                     <td>{{ $mhs->jenis_kelamin ?? '-' }}</td>
                                     <td class="text-start">
                                         @if($prodi)
@@ -676,7 +676,7 @@
                                         <form action="{{ route('admin.peserta-kelas-kuliah.destroy', $peserta->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-icon btn-sm btn-outline-danger" title="Keluarkan Peserta" onclick="return confirm('Yakin ingin mengeluarkan {{ $mhs->nama ?? 'Mahasiswa ini' }} dari kelas?')">
+                                            <button type="submit" class="btn btn-icon btn-sm btn-outline-danger" title="Keluarkan Peserta" onclick="return confirm('Yakin ingin mengeluarkan {{ $mhs->nama_mahasiswa ?? 'Mahasiswa ini' }} dari kelas?')">
                                                 <i class="ri-delete-bin-line"></i>
                                             </button>
                                         </form>

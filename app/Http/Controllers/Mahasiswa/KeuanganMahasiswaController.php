@@ -74,13 +74,17 @@ class KeuanganMahasiswaController extends Controller
                 'local'
             );
 
-            Pembayaran::create([
+            $pembayaran = Pembayaran::create([
                 'tagihan_id' => $tagihan->id,
                 'jumlah_bayar' => $request->jumlah_bayar,
                 'tanggal_bayar' => $request->tanggal_bayar,
                 'bukti_bayar' => $path,
                 'status_verifikasi' => Pembayaran::STATUS_PENDING,
             ]);
+
+            // Broadcast notifikasi ke seluruh Admin & Keuangan
+            $notifiableUsers = \App\Models\User::role(['admin', 'Keuangan'])->get();
+            \Illuminate\Support\Facades\Notification::send($notifiableUsers, new \App\Notifications\UploadPembayaranNotification($pembayaran));
 
             Log::info("CRUD_CREATE: Mahasiswa upload bukti bayar", [
                 'mahasiswa_id' => $mahasiswa->id,

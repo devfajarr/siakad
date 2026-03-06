@@ -171,6 +171,9 @@ class TagihanService
                 // Beri tahu mahasiswa pembayaran ditolak via database notification
                 $userMahasiswa = $pembayaran->tagihan->mahasiswa->user;
                 $userMahasiswa->notify(new \App\Notifications\PembayaranDitolakNotification($pembayaran));
+            } elseif ($disetujui && $pembayaran->tagihan->mahasiswa && $pembayaran->tagihan->mahasiswa->user) {
+                $userMahasiswa = $pembayaran->tagihan->mahasiswa->user;
+                $userMahasiswa->notify(new \App\Notifications\PembayaranDisetujuiNotification($pembayaran));
             }
 
             $action = $disetujui ? 'DISETUJUI' : 'DITOLAK';

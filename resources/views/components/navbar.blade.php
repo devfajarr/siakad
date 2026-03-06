@@ -41,18 +41,16 @@
                 @php
                     $unreadCount = auth()->user()->unreadNotifications->count();
                 @endphp
-                @if(auth()->user()->hasRole('Mahasiswa'))
-                    <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-4 me-xl-1">
-                        <a class="nav-link btn btn-text-secondary rounded-pill btn-icon hide-arrow"
-                            href="{{ route('mahasiswa.notifikasi.index') }}">
-                            <i class="ri-notification-2-line ri-22px"></i>
-                            @if($unreadCount > 0)
-                                <span
-                                    class="position-absolute top-0 start-50 translate-middle-y badge badge-dot bg-danger mt-2 border"></span>
-                            @endif
-                        </a>
-                    </li>
-                @endif
+                <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-4 me-xl-1">
+                    <a class="nav-link btn btn-text-secondary rounded-pill btn-icon hide-arrow"
+                        href="{{ route('notifikasi.index') }}">
+                        <i class="ri-notification-2-line ri-22px"></i>
+                        @if($unreadCount > 0)
+                            <span
+                                class="position-absolute top-0 start-50 translate-middle-y badge badge-dot bg-danger mt-2 border"></span>
+                        @endif
+                    </a>
+                </li>
             @endauth
             <!--/ Notification -->
             <!-- User -->

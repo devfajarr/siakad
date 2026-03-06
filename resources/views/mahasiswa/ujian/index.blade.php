@@ -28,6 +28,21 @@
     @endif
 
     <div class="row">
+        <!-- Info Kelayakan Ujian -->
+        <div class="col-12 mb-4">
+            <div class="alert alert-info d-flex align-items-center mb-0 shadow-sm border-0" role="alert">
+                <i class="ri-information-line fs-4 me-3 text-info"></i>
+                <div>
+                    <strong>Syarat Mencetak Kartu Ujian:</strong> Mahasiswa dinyatakan <b>Layak</b> mengikuti ujian dan
+                    diperbolehkan mencetak Kartu Ujian jika
+                    status <b>KRS telah di-ACC</b> dan persentase kehadiran mencapai minimal
+                    <b>{{ config('academic.min_persentase_ujian', 75) }}%</b> dari target
+                    <b>{{ config('academic.target_pertemuan_per_blok', 7) }} pertemuan</b> per blok ujian (UTS mengacu pada
+                    pertemuan 1-7, UAS mengacu pada pertemuan 8-14).
+                </div>
+            </div>
+        </div>
+
         <!-- Student Info Card -->
         <div class="col-xl-4 col-lg-5 col-md-5 order-1 order-md-0">
             <div class="card mb-4 border-top border-primary border-3">
@@ -78,11 +93,6 @@
                             <span class="badge bg-label-{{ $tipeKelas === 'Pagi' ? 'warning' : 'info' }}">
                                 {{ $tipeKelas ?? 'Belum ditentukan' }}
                             </span>
-                        </li>
-                        <li class="mb-3">
-                            <span class="fw-bold me-2 text-muted">Min. Kehadiran:</span>
-                            <span>{{ config('academic.min_kehadiran_ujian') }}/{{ config('academic.target_pertemuan') }}
-                                pertemuan</span>
                         </li>
                     </ul>
 

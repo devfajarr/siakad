@@ -112,6 +112,10 @@ class KrsApprovalController extends Controller
 
             DB::commit();
 
+            if ($updated > 0 && $mahasiswa->user) {
+                $mahasiswa->user->notify(new \App\Notifications\PersetujuanKrsNotification($semesterId, $dosen->nama));
+            }
+
             Log::info("CRUD_UPDATE: Dosen PA Approve KRS", ['nim' => $mahasiswa->nim, 'count' => $updated]);
 
             return back()->with('success', "KRS Mahasiswa {$mahasiswa->nama_mahasiswa} berhasil di ACC.");

@@ -18,4 +18,10 @@ return [
      * Default: 75%.
      */
     'min_persentase_ujian' => 75,
+
+    /**
+     * Jumlah konversi nominal kehadiran minimum (1 semester penuh untuk kelayakan ujian dsb).
+     * Seringkali 75%  * 14 pertemuan bulat ke atas = 11 pertemuan.
+     */
+    'min_kehadiran_ujian' => 11,
 ];

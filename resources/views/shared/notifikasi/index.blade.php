@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Notifikasi')
+@section('title', 'Notifikasi Sistem')
 
 @section('content')
     <div class="row">
@@ -9,7 +9,7 @@
                 <div class="card-header border-bottom d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Notifikasi Sistem</h5>
                     @if($notifications->count() > 0)
-                        <form action="{{ route('mahasiswa.notifikasi.read-all') }}" method="POST" class="d-inline">
+                        <form action="{{ route('notifikasi.read-all') }}" method="POST" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-outline-primary">Tandai Semua Terbaca</button>
                         </form>
@@ -21,33 +21,48 @@
                             <div
                                 class="list-group-item list-group-item-action py-3 {{ $notification->unread() ? 'bg-label-secondary' : '' }}">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <div>
+                                    <div class="flex-grow-1">
                                         <div class="d-flex align-items-center mb-1">
                                             @if($notification->unread())
                                                 <span class="badge badge-dot bg-danger me-2"></span>
                                             @endif
                                             <h6 class="mb-0 {{ $notification->unread() ? 'fw-bold' : '' }}">
-                                                {{ $notification->data['pesan'] ?? 'Ada Notifikasi Baru' }}
+                                                {{ $notification->data['title'] ?? ($notification->data['pesan'] ?? 'Ada Notifikasi Baru') }}
                                             </h6>
                                         </div>
-                                        <p class="mb-1 text-muted small">
-                                            Pembayaran untuk <strong>{{ $notification->data['komponen'] ?? '-' }}</strong>
-                                            sebesar
-                                            Rp {{ number_format($notification->data['nominal'] ?? 0, 0, ',', '.') }} ditolak.
-                                        </p>
-                                        @if(!empty($notification->data['catatan_admin']))
-                                            <div class="bg-light p-2 rounded mt-2 small">
-                                                <strong>Catatan Admin:</strong><br>
-                                                {{ $notification->data['catatan_admin'] }}
-                                            </div>
+
+                                        {{-- Struktur Lama (Pembayaran Ditolak) --}}
+                                        @if(isset($notification->data['komponen']))
+                                            <p class="mb-1 text-muted small">
+                                                Pembayaran untuk <strong>{{ $notification->data['komponen'] ?? '-' }}</strong>
+                                                sebesar
+                                                Rp {{ number_format($notification->data['nominal'] ?? 0, 0, ',', '.') }} ditolak.
+                                            </p>
+                                            @if(!empty($notification->data['catatan_admin']))
+                                                <div class="bg-light p-2 rounded mt-2 small">
+                                                    <strong>Catatan Admin:</strong><br>
+                                                    {{ $notification->data['catatan_admin'] }}
+                                                </div>
+                                            @endif
+                                        @else
+                                            {{-- Struktur Baru (Pesan General) --}}
+                                            <p class="mb-1 text-muted small">
+                                                {{ $notification->data['message'] ?? '' }}
+                                            </p>
                                         @endif
+
+                                        @if(isset($notification->data['url']))
+                                            <a href="{{ $notification->data['url'] }}" class="btn btn-sm btn-link px-0"><i
+                                                    class="ri-links-line me-1"></i> Lihat Detail</a>
+                                        @endif
+
                                         <small class="text-muted mt-2 d-block">
                                             <i class="ri-time-line me-1"></i>
                                             {{ \Carbon\Carbon::parse($notification->created_at)->diffForHumans() }}
                                         </small>
                                     </div>
                                     @if($notification->unread())
-                                        <form action="{{ route('mahasiswa.notifikasi.read', $notification->id) }}" method="POST">
+                                        <form action="{{ route('notifikasi.read', $notification->id) }}" method="POST" class="ms-3">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-icon btn-text-secondary rounded-pill"
                                                 title="Tandai Terbaca">
