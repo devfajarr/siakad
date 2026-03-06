@@ -196,6 +196,24 @@
             </div>
         </div>
     </div>
+    
+    <!-- Modal Progress Bar -->
+    <div class="modal fade" id="modalProgressInit" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalProgressInitTitle"><i class="ri-loader-4-line spin text-primary me-2"></i> Sinkronisasi Akun Sedang Berjalan</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="mb-3 text-muted" id="progressInitText">Mengumpulkan data mahasiswa...</p>
+                    <div class="progress" style="height: 25px;">
+                        <div id="progressInitBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                    <small class="text-warning mt-3 d-block"><i class="ri-error-warning-line"></i> Jangan tutup halaman ini sampai proses selesai.</small>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -515,36 +533,112 @@
             });
         }
 
-        // Function for Mass Init All User Accounts
+        // Function for Mass Init All User Accounts via Chunking/Batching
         function processInitAllAccounts() {
-            if (!confirm('Proses ini akan membuat akun login untuk SEMUA mahasiswa yang belum memiliki akun.\nUsername & Password default: NIM\n\nLanjutkan?')) {
+            if (!confirm('Proses ini akan membuat akun login untuk SEMUA mahasiswa yang belum memiliki akun.\nProses akan berjalan bertahap untuk mencegah kegagalan pada server.\nUsername & Password default: NIM\n\nLanjutkan?')) {
                 return;
             }
 
+            let $btn = $('.btn-outline-info');
+            $btn.prop('disabled', true);
+
+            // 1. Dapatkan daftar ID mahasiswa yang belum punya akun
             $.ajax({
-                url: '{{ route("admin.mahasiswa.init-all-accounts") }}',
-                type: 'POST',
-                data: { _token: '{{ csrf_token() }}' },
-                beforeSend: function () {
-                    $('.btn-outline-info').prop('disabled', true);
-                },
-                success: function (response) {
-                    if (response.success) {
-                        alert(response.message);
-                        location.reload();
-                    } else {
-                        alert('Gagal: ' + response.message);
+                url: '{{ route("admin.mahasiswa.uninitialized-ids") }}',
+                type: 'GET',
+                success: function (res) {
+                    if (!res.success) {
+                        alert(res.message);
+                        $btn.prop('disabled', false);
+                        return;
                     }
-                },
-                error: function (xhr) {
-                    let msg = 'Terjadi kesalahan server.';
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        msg = xhr.responseJSON.message;
+
+                    let ids = res.ids;
+                    let total = res.total;
+
+                    if (total === 0) {
+                        alert('Tidak ditemukan mahasiswa yang belum memiliki akun. Seluruh mahasiswa telah terhubung.');
+                        $btn.prop('disabled', false);
+                        return;
                     }
-                    alert(msg);
+
+                    // Tampilkan UI Progress Bar
+                    $('#modalProgressInit').modal('show');
+                    $('#progressInitText').text('Bersiap inisialisasi ' + total + ' akun mahasiswa...');
+                    $('#progressInitBar').css('width', '1%').attr('aria-valuenow', 1).text('1%');
+
+                    // Set Konfigurasi Batch (100 Data per-lemparan)
+                    const chunkSize = 100;
+                    let chunks = [];
+                    for (let i = 0; i < total; i += chunkSize) {
+                        chunks.push(ids.slice(i, i + chunkSize));
+                    }
+
+                    let totalChunks = chunks.length;
+                    let currentChunk = 0;
+                    let totalCreated = 0;
+                    let totalSkipped = 0;
+
+                    // 2. Fungsi Eksekutor Rekursif (Memanggil chunks satu demi satu secara berurutan)
+                    function processNextChunk() {
+                        if (currentChunk >= totalChunks) {
+                            // Seluruh perulangan selesai
+                            $('#progressInitBar').removeClass('progress-bar-animated').addClass('bg-success');
+                            $('#progressInitText').text('Inisialisasi akun selesai! Mengalihkan...');
+                            setTimeout(() => {
+                                $('#modalProgressInit').modal('hide');
+                                alert(`Selesai! Berhasil inisialisasi ${totalCreated} akun baru. (${totalSkipped} data dilewati / gagal)`);
+                                location.reload();
+                            }, 1000);
+                            return;
+                        }
+
+                        let batchData = chunks[currentChunk];
+                        
+                        $.ajax({
+                            url: '{{ route("admin.mahasiswa.init-all-accounts") }}',
+                            type: 'POST',
+                            data: { 
+                                _token: '{{ csrf_token() }}',
+                                mahasiswa_ids: batchData
+                            },
+                            success: function(batchRes) {
+                                if(batchRes.success) {
+                                    totalCreated += batchRes.created;
+                                    totalSkipped += batchRes.skipped;
+                                }
+                                
+                                currentChunk++;
+                                
+                                // Kalkulasi & Update Presentase View
+                                let processedData = Math.min((currentChunk * chunkSize), total);
+                                let percentage = Math.round((processedData / total) * 100);
+                                
+                                $('#progressInitBar').css('width', percentage + '%').attr('aria-valuenow', percentage).text(percentage + '%');
+                                $('#progressInitText').html(`Memproses <b>${processedData}</b> dari <b>${total}</b> mahasiswa...`);
+
+                                // Lepar antrean chunk berikutnya
+                                processNextChunk();
+                            },
+                            error: function(xhr) {
+                                let msg = 'Terjadi kesalahan memproses batch.';
+                                if (xhr.responseJSON && xhr.responseJSON.message) {
+                                    msg = xhr.responseJSON.message;
+                                }
+                                alert('Error saat proses: ' + msg);
+                                $('#modalProgressInit').modal('hide');
+                                $btn.prop('disabled', false);
+                            }
+                        });
+                    }
+
+                    // Mulai tembak request batch pertama kali
+                    processNextChunk();
+
                 },
-                complete: function () {
-                    $('.btn-outline-info').prop('disabled', false);
+                error: function () {
+                    alert('Gagal mengambil daftar target inisialisasi dari server.');
+                    $btn.prop('disabled', false);
                 }
             });
         }

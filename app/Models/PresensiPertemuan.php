@@ -13,6 +13,17 @@ class PresensiPertemuan extends Model
 
     protected $table = 'presensi_pertemuan';
 
+    // ─── Constants ──────────────────────────────────────────
+    const STATUS_PENDING = 'pending';
+    const STATUS_TERVERIFIKASI = 'terverifikasi';
+    const STATUS_DITOLAK = 'ditolak';
+
+    const STATUS_VERIFIKASI_OPTIONS = [
+        self::STATUS_PENDING => 'Sedang Direview',
+        self::STATUS_TERVERIFIKASI => 'Terverifikasi (Valid)',
+        self::STATUS_DITOLAK => 'Ditolak (Tidak Sah)',
+    ];
+
     protected $fillable = [
         'id_kelas_kuliah',
         'id_dosen',
@@ -22,6 +33,10 @@ class PresensiPertemuan extends Model
         'jam_selesai',
         'materi',
         'metode_pembelajaran',
+        // Verifikasi Honorer
+        'status_verifikasi',
+        'verified_by',
+        'verified_at',
         // Monitoring
         'sumber_data',
         'status_sinkronisasi',
@@ -41,6 +56,7 @@ class PresensiPertemuan extends Model
         'is_deleted_server' => 'boolean',
         'is_local_change' => 'boolean',
         'is_deleted_local' => 'boolean',
+        'verified_at' => 'datetime',
     ];
 
     /**
@@ -65,5 +81,13 @@ class PresensiPertemuan extends Model
     public function presensiMahasiswas(): HasMany
     {
         return $this->hasMany(PresensiMahasiswa::class, 'presensi_pertemuan_id');
+    }
+
+    /**
+     * Relasi ke User / Dosen yang melakukan verifikasi.
+     */
+    public function verifikator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 }

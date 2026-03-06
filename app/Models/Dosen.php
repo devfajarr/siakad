@@ -56,6 +56,11 @@ class Dosen extends Model
     }
 
     // Relations
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function penugasans(): HasMany
     {
         return $this->hasMany(DosenPenugasan::class, 'id_dosen');

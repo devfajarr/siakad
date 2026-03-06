@@ -196,13 +196,19 @@ class MahasiswaController extends Controller
     }
 
     /**
-     * Inisialisasi akun untuk SEMUA mahasiswa yang belum memiliki user.
-     * Username = NIM, Password = NIM.
+     * Inisialisasi akun untuk mahasiswa tertentu via batch / ids array.
      */
-    public function initAllAccounts(\App\Services\MahasiswaAccountGenerationService $service)
+    public function initAllAccounts(Request $request, \App\Services\MahasiswaAccountGenerationService $service)
     {
         try {
-            $mahasiswas = Mahasiswa::whereNull('user_id')
+            // Kita proses berdasarkan input ID dari request chunk frontend agar tidak memory leak
+            $ids = $request->input('mahasiswa_ids', []);
+            if (empty($ids)) {
+                return response()->json(['success' => false, 'message' => 'Tidak ada ID mahasiswa yang valid untuk diproses.']);
+            }
+
+            $mahasiswas = Mahasiswa::whereIn('id', $ids)
+                ->whereNull('user_id')
                 ->with('riwayatAktif')
                 ->get();
 
@@ -250,6 +256,23 @@ class MahasiswaController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
             return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Mengambil seluruh referensi ID Mahasiswa yang belum memiliki USER_ID (Untuk batching UI Frontend)
+     */
+    public function getUninitializedIds()
+    {
+        try {
+            $ids = Mahasiswa::whereNull('user_id')->pluck('id')->toArray();
+            return response()->json([
+                'success' => true,
+                'total' => count($ids),
+                'ids' => $ids
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal mengambil data target akun: ' . $e->getMessage()]);
         }
     }
 

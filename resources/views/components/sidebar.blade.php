@@ -63,7 +63,23 @@
                     <div data-i18n="Dashboard">Dashboard</div>
                 </a>
             </li>
+        @else
+            <!-- Dashboard Default System (Hanya untuk non-admin) -->
+            <li
+                class="menu-item {{ request()->routeIs(['dashboard', 'dosen.dashboard', 'mahasiswa.dashboard', 'pegawai.dashboard']) ? 'active' : '' }}">
+                @php
+                    $dashboardRoute = auth()->user()->hasRole('Dosen') ? route('dosen.dashboard') :
+                        (auth()->user()->hasRole('Pegawai') ? route('pegawai.dashboard') :
+                            (auth()->user()->hasRole('Mahasiswa') ? route('mahasiswa.dashboard') : url('/dashboard')));
+                @endphp
+                <a href="{{ $dashboardRoute }}" class="menu-link">
+                    <i class="menu-icon tf-icons ri-home-smile-line"></i>
+                    <div data-i18n="Dashboard Utama">Dashboard Utama</div>
+                </a>
+            </li>
+        @endif
 
+        @if(auth()->check() && auth()->user()->hasRole('admin'))
             <!-- Sivitas Akademika -->
             <li class="menu-header mt-5 small text-uppercase">
                 <span class="menu-header-text">Sivitas Akademika</span>
@@ -202,43 +218,10 @@
         @endif
 
         <!-- ============================================== -->
-        <!-- ROLE: ADMIN ATAU KEUANGAN                      -->
+        <!-- ROLE: ADMIN                                    -->
         <!-- ============================================== -->
-        @if(auth()->check() && (auth()->user()->hasRole('admin') || auth()->user()->hasRole('Keuangan')))
-            <!-- Modul Keuangan -->
-            <li class="menu-header mt-5 small text-uppercase">
-                <span class="menu-header-text">Modul Keuangan</span>
-            </li>
-            <li class="menu-item {{ request()->routeIs('admin.keuangan-dashboard') ? 'active' : '' }}">
-                <a href="{{ route('admin.keuangan-dashboard') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ri-dashboard-3-line"></i>
-                    <div data-i18n="Dashboard Keuangan">Dashboard Keuangan</div>
-                </a>
-            </li>
-            <li class="menu-item {{ request()->routeIs('admin.keuangan-modul.komponen-biaya.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.keuangan-modul.komponen-biaya.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ri-file-list-2-line"></i>
-                    <div data-i18n="Komponen Biaya">Komponen Biaya</div>
-                </a>
-            </li>
-            <li class="menu-item {{ request()->routeIs('admin.keuangan-modul.tagihan.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.keuangan-modul.tagihan.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ri-bill-line"></i>
-                    <div data-i18n="Tagihan Mahasiswa">Tagihan Mahasiswa</div>
-                </a>
-            </li>
-            <li class="menu-item {{ request()->routeIs('admin.keuangan-modul.verifikasi.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.keuangan-modul.verifikasi.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ri-checkbox-circle-line"></i>
-                    <div data-i18n="Verifikasi Pembayaran">Verifikasi Pembayaran</div>
-                </a>
-            </li>
-            <li class="menu-item {{ request()->routeIs('admin.laporan-keuangan.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.laporan-keuangan.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ri-file-excel-2-line"></i>
-                    <div data-i18n="Laporan">Laporan</div>
-                </a>
-            </li>
+        @if(auth()->check() && auth()->user()->hasRole('admin'))
+            @include('components.sidebar-modul-keuangan')
         @endif
 
         <!-- ============================================== -->
@@ -317,19 +300,7 @@
                     <div data-i18n="Sync Manager">Neo Feeder Sync</div>
                 </a>
             </li>
-        @else
-            <li
-                class="menu-item {{ request()->routeIs(['dashboard', 'dosen.dashboard', 'mahasiswa.dashboard', 'pegawai.dashboard']) ? 'active' : '' }}">
-                @php
-                    $dashboardRoute = auth()->user()->hasRole('Dosen') ? route('dosen.dashboard') :
-                        (auth()->user()->hasRole('Pegawai') ? route('pegawai.dashboard') :
-                            (auth()->user()->hasRole('Mahasiswa') ? route('mahasiswa.dashboard') : url('/dashboard')));
-                @endphp
-                <a href="{{ $dashboardRoute }}" class="menu-link">
-                    <i class="menu-icon tf-icons ri-home-smile-line"></i>
-                    <div data-i18n="Dashboard Utama">Dashboard Utama</div>
-                </a>
-            </li>
+
         @endif
 
         {{-- CONTOH ACTIVE ROLE UX UNTUK DOSEN / KAPRODI --}}
@@ -356,6 +327,10 @@
                     <div data-i18n="Input Nilai Mahasiswa">Input Nilai Mahasiswa</div>
                 </a>
             </li>
+
+            @if(auth()->user()->hasRole('Keuangan') && !auth()->user()->hasRole('admin'))
+                @include('components.sidebar-modul-keuangan')
+            @endif
 
             <li class="menu-header mt-5 small text-uppercase">
                 <span class="menu-header-text">Layanan</span>
@@ -424,6 +399,10 @@
                     <div data-i18n="Kuisioner AMI">Kuisioner AMI</div>
                 </a>
             </li>
+
+            @if(auth()->user()->hasRole('Keuangan') && !auth()->user()->hasRole('admin'))
+                @include('components.sidebar-modul-keuangan')
+            @endif
 
         @elseif(session('active_role') == 'Mahasiswa')
             <li class="menu-header mt-5 small text-uppercase">

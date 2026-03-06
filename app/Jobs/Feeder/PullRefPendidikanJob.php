@@ -149,13 +149,15 @@ class PullRefPendidikanJob implements ShouldQueue
                     'kode_program_studi' => $item['kode_program_studi'] ?? null,
                     'nama_program_studi' => $item['nama_program_studi'] ?? null,
                     'status' => $item['status'] ?? null,
+                    'id_jenjang_pendidikan' => $item['id_jenjang_pendidikan'] ?? null,
+                    'nama_jenjang_pendidikan' => $item['nama_jenjang_pendidikan'] ?? null,
                     'created_at' => $timestamp,
                     'updated_at' => $timestamp,
                 ];
             }
 
             if (!empty($upsertData)) {
-                ProgramStudi::upsert($upsertData, ['id_prodi'], ['kode_program_studi', 'nama_program_studi', 'status', 'updated_at']);
+                ProgramStudi::upsert($upsertData, ['id_prodi'], ['kode_program_studi', 'nama_program_studi', 'status', 'id_jenjang_pendidikan', 'nama_jenjang_pendidikan', 'updated_at']);
             }
 
             Log::info("SYNC_PULL: [Ref.Pendidikan] Prodi Lokal selesai: " . count($upsertData) . " records.");

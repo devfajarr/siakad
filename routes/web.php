@@ -59,6 +59,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('mahasiswa/toggle-tipe-kelas', [MahasiswaController::class, 'toggleTipeKelas'])->name('mahasiswa.toggle-tipe-kelas');
     Route::post('mahasiswa/bulk-tipe-kelas', [MahasiswaController::class, 'bulkTipeKelas'])->name('mahasiswa.bulk-tipe-kelas');
     Route::post('mahasiswa/init-tipe-kelas', [MahasiswaController::class, 'initTipeKelas'])->name('mahasiswa.init-tipe-kelas');
+    Route::get('mahasiswa/uninitialized-ids', [MahasiswaController::class, 'getUninitializedIds'])->name('mahasiswa.uninitialized-ids');
     Route::post('mahasiswa/init-all-accounts', [MahasiswaController::class, 'initAllAccounts'])->name('mahasiswa.init-all-accounts');
     Route::resource('mahasiswa', MahasiswaController::class);
 
@@ -177,6 +178,10 @@ Route::middleware(['auth', 'role:admin|Keuangan'])->prefix('keuangan')->name('ad
         Route::post('verifikasi/{pembayaran}/reject', [\App\Http\Controllers\Admin\Keuangan\VerifikasiPembayaranController::class, 'reject'])->name('verifikasi.reject');
         Route::get('verifikasi/{pembayaran}/bukti', [\App\Http\Controllers\Admin\Keuangan\VerifikasiPembayaranController::class, 'downloadBukti'])->name('verifikasi.bukti');
         Route::get('search-mahasiswa', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'searchMahasiswa'])->name('search-mahasiswa');
+
+        // Monitoring Perkuliahan untuk Rekap Honorer Keuangan
+        Route::get('monitoring-perkuliahan', [\App\Http\Controllers\Keuangan\MonitoringPerkuliahanController::class, 'index'])->name('monitoring-perkuliahan.index');
+        Route::get('monitoring-perkuliahan/export', [\App\Http\Controllers\Keuangan\MonitoringPerkuliahanController::class, 'export'])->name('monitoring-perkuliahan.export');
     });
 
     // Fitur Laporan

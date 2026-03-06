@@ -48,7 +48,7 @@
                                     <option value=""></option>
                                     @foreach($prodis as $prodi)
                                         <option value="{{ $prodi->id_prodi }}">{{ $prodi->nama_program_studi }}
-                                            ({{ $prodi->jenjang_pendidikan }})</option>
+                                            ({{ $prodi->kode_program_studi }})</option>
                                     @endforeach
                                 </select>
                             </div>
