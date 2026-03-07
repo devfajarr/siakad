@@ -22,3 +22,8 @@
 
 ### Fitur Bimbingan Konseling
 - [ ] Tambah fitur bimbingan konseling (tampilkan button yang akan meredirect ke nomor whatsapp dosen bimbingan konseling atau dosen PA).
+
+
+### ISSUE
+- [ ] Perbaiki atau realisasikan fitur akses cepat pada dashboard mahasiswa untuk akses KRS, Jadwal, dan Histori Hasil Studi.
+- [ ] Perbaiki atau realisasikan Pengumunan Baru pada dashboard mahasiswa untuk menampilkan pengumunan seperti periode pengambilan KRS, Pengisian Kuisioner, Klaim kartu ujian, jadwal ujian.  Durasi penampilan pengumuman menyesuaikan tanggal posting dari admin yang menset-nya. 

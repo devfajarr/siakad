@@ -342,6 +342,20 @@
                 </a>
             </li>
             @can('is-academic-advisor')
+                @php
+                    $dosenLogin = auth()->user()->dosen;
+                    $pendingKrsCount = 0;
+                    if ($dosenLogin) {
+                        $activeSemId = getActiveSemesterId();
+                        $pendingKrsCount = $dosenLogin->mahasiswaBimbingan()
+                            ->whereHas('riwayatAktif', function ($rq) use ($activeSemId) {
+                                $rq->whereHas('pesertaKelasKuliahs', function ($pq) use ($activeSemId) {
+                                    $pq->where('status_krs', 'pending')
+                                        ->whereHas('kelasKuliah', fn($kq) => $kq->where('id_semester', $activeSemId));
+                                });
+                            })->count();
+                    }
+                @endphp
                 <li class="menu-header mt-5 small text-uppercase">
                     <span class="menu-header-text">Pembimbing Akademik</span>
                 </li>
@@ -349,6 +363,9 @@
                     <a href="{{ route('dosen.perwalian.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons ri-group-line"></i>
                         <div data-i18n="Mahasiswa Bimbingan">Mahasiswa Bimbingan</div>
+                        @if($pendingKrsCount > 0)
+                            <div class="badge bg-danger rounded-pill ms-auto">{{ $pendingKrsCount }}</div>
+                        @endif
                     </a>
                 </li>
             @endcan

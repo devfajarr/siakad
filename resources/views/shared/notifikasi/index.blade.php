@@ -52,8 +52,13 @@
                                         @endif
 
                                         @if(isset($notification->data['url']))
-                                            <a href="{{ $notification->data['url'] }}" class="btn btn-sm btn-link px-0"><i
-                                                    class="ri-links-line me-1"></i> Lihat Detail</a>
+                                            <form action="{{ route('notifikasi.read', $notification->id) }}" method="POST"
+                                                class="d-inline mt-1">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-primary px-3">
+                                                    <i class="ri-arrow-right-up-line me-1"></i> Lihat Detail
+                                                </button>
+                                            </form>
                                         @endif
 
                                         <small class="text-muted mt-2 d-block">
@@ -61,7 +66,7 @@
                                             {{ \Carbon\Carbon::parse($notification->created_at)->diffForHumans() }}
                                         </small>
                                     </div>
-                                    @if($notification->unread())
+                                    @if($notification->unread() && !isset($notification->data['url']))
                                         <form action="{{ route('notifikasi.read', $notification->id) }}" method="POST" class="ms-3">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-icon btn-text-secondary rounded-pill"
