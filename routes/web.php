@@ -261,6 +261,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         Route::get('/print/{pesertaUjianId}', 'printKartu')->name('print-kartu');
         Route::get('/permintaan-cetak', 'permintaanCetak')->name('permintaan-cetak');
     });
+
+    // Pengumuman
+    Route::resource('pengumuman', \App\Http\Controllers\Admin\PengumumanController::class)
+        ->except(['create', 'show', 'edit'])->names([
+                'index' => 'admin.pengumuman.index',
+                'store' => 'admin.pengumuman.store',
+                'update' => 'admin.pengumuman.update',
+                'destroy' => 'admin.pengumuman.destroy',
+            ]);
 });
 
 // Global Notifications (All Authenticated Users)

@@ -25,5 +25,5 @@
 
 
 ### ISSUE
-- [ ] Perbaiki atau realisasikan fitur akses cepat pada dashboard mahasiswa untuk akses KRS, Jadwal, dan Histori Hasil Studi.
-- [ ] Perbaiki atau realisasikan Pengumunan Baru pada dashboard mahasiswa untuk menampilkan pengumunan seperti periode pengambilan KRS, Pengisian Kuisioner, Klaim kartu ujian, jadwal ujian.  Durasi penampilan pengumuman menyesuaikan tanggal posting dari admin yang menset-nya. 
+- [x] Perbaiki atau realisasikan fitur akses cepat pada dashboard mahasiswa untuk akses KRS, Jadwal, dan Histori Hasil Studi.
+- [x] Perbaiki atau realisasikan Pengumunan Baru pada dashboard mahasiswa untuk menampilkan pengumunan seperti periode pengambilan KRS, Pengisian Kuisioner, Klaim kartu ujian, jadwal ujian.  Durasi penampilan pengumuman menyesuaikan tanggal posting dari admin yang menset-nya. 

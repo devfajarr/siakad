@@ -133,13 +133,16 @@
                         <p class="small text-white-50">Navigasi praktis ke menu utama</p>
                     </div>
                     <div class="d-grid gap-3">
-                        <a href="#" class="btn btn-white text-primary fw-bold text-start p-3 border-0">
+                        <a href="{{ route('mahasiswa.krs.index') }}"
+                            class="btn btn-white text-primary fw-bold text-start p-3 border-0">
                             <i class="ri-file-list-3-line me-2"></i> Kartu Rencana Studi (KRS)
                         </a>
-                        <a href="#" class="btn btn-white text-primary fw-bold text-start p-3 border-0">
+                        <a href="{{ route('mahasiswa.jadwal.index') }}"
+                            class="btn btn-white text-primary fw-bold text-start p-3 border-0">
                             <i class="ri-calendar-event-line me-2"></i> Jadwal Mingguan
                         </a>
-                        <a href="#" class="btn btn-white text-primary fw-bold text-start p-3 border-0">
+                        <a href="{{ route('mahasiswa.khs.index') }}"
+                            class="btn btn-white text-primary fw-bold text-start p-3 border-0">
                             <i class="ri-graduation-cap-line me-2"></i> Histori Hasil Studi
                         </a>
                     </div>
@@ -151,16 +154,26 @@
 
             <div class="card border-0 shadow-sm">
                 <div class="card-header pb-2">
-                    <h5 class="card-title mb-0">Pengumuman Terbaru</h5>
+                    <h5 class="card-title mb-0"><i class="ri-megaphone-line me-2 text-warning"></i>Pengumuman Terbaru</h5>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-outline-primary d-flex align-items-center p-3 mb-0" role="alert">
-                        <span class="alert-icon me-3"><i class="ri-information-line"></i></span>
-                        <div class="small">
-                            Periode pengisian KRS akan dibuka mulai tanggal 1 Maret 2026. Pastikan Anda telah menyelesaikan
-                            pembayaran registrasi.
+                    @forelse($pengumumans as $pengumuman)
+                        <div class="alert alert-outline-primary d-flex align-items-start p-3 {{ !$loop->last ? 'mb-3' : 'mb-0' }}"
+                            role="alert">
+                            <span class="alert-icon me-3 mt-1"><i class="{{ $pengumuman->icon_display }}"></i></span>
+                            <div>
+                                <h6 class="alert-heading mb-1 small fw-bold">{{ $pengumuman->judul }}</h6>
+                                <p class="small mb-1">{{ $pengumuman->konten }}</p>
+                                <small class="text-muted">{{ $pengumuman->tgl_mulai->format('d M Y') }} —
+                                    {{ $pengumuman->tgl_selesai->format('d M Y') }}</small>
+                            </div>
                         </div>
-                    </div>
+                    @empty
+                        <div class="text-center py-4 text-muted">
+                            <i class="ri-information-line ri-2x mb-2"></i>
+                            <p class="small mb-0">Tidak ada pengumuman saat ini.</p>
+                        </div>
+                    @endforelse
                 </div>
             </div>
         </div>

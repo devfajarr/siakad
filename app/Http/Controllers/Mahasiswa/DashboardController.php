@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\JadwalKuliah;
+use App\Models\Pengumuman;
 use App\Models\PesertaKelasKuliah;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
@@ -62,6 +62,9 @@ class DashboardController extends Controller
             ->orderBy('jam_mulai')
             ->get();
 
+        // 4. Pengumuman Aktif
+        $pengumumans = Pengumuman::aktif()->latest()->take(5)->get();
+
         Log::info("DASHBOARD_MAHASISWA: Diakses oleh {$mahasiswa->nama_mahasiswa}");
 
         return view('mahasiswa.dashboard', compact(
@@ -70,7 +73,8 @@ class DashboardController extends Controller
             'activeSemester',
             'totalSks',
             'totalMatkul',
-            'todaySchedules'
+            'todaySchedules',
+            'pengumumans'
         ));
     }
 }
