@@ -38,6 +38,7 @@
                 $isAcc = $krsItems->every(fn($i) => $i->status_krs === 'acc');
             @endphp
 
+            @if($krsItems->isNotEmpty())
             @if($isPending || $isDraft)
                 <div class="card bg-label-warning border-warning mb-4">
                     <div class="card-body text-center">
@@ -59,12 +60,13 @@
                     <div class="card-body">
                         <i class="ri-checkbox-circle-line ri-3x text-success mb-2"></i>
                         <h5 class="text-success">KRS TELAH DI-ACC</h5>
-                        <p class="mb-3 small">Disetujui pada: {{ $krsItems->first()->last_acc_at ? $krsItems->first()->last_acc_at->format('d/m/Y H:i') : '-' }}</p>
+                        <p class="mb-3 small">Disetujui pada: {{ $krsItems->first()?->last_acc_at ? $krsItems->first()->last_acc_at->format('d/m/Y H:i') : '-' }}</p>
                         <a href="{{ route('dosen.perwalian.print', [$mahasiswa->id, 'autoprint' => 1]) }}" target="_blank" class="btn btn-success w-100">
                             <i class="ri-printer-line me-1"></i> CETAK KRS RESMI
                         </a>
                     </div>
                 </div>
+            @endif
             @endif
         </div>
 

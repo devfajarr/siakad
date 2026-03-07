@@ -86,7 +86,7 @@
                         <th>Nama Mahasiswa</th>
                         <th>Program Studi</th>
                         <th>Status KRS</th>
-                        <th style="width: 100px;">Aksi</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -98,8 +98,9 @@
                             <td>{{ $m->riwayatAktif?->programStudi?->nama_program_studi }}</td>
                             <td>{!! $m->status_krs_label !!}</td>
                             <td>
-                                <a href="{{ route('dosen.perwalian.show', $m->id) }}" class="btn btn-sm btn-primary">
-                                    <i class="ri-eye-line me-1"></i> Lihat KRS
+                                <a href="{{ route('dosen.perwalian.show', $m->id) }}" class="btn btn-sm btn-primary "
+                                    title="Lihat KRS">
+                                    <i class="ri-eye-line me-2"></i>Lihat KRS
                                 </a>
                             </td>
                         </tr>

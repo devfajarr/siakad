@@ -345,7 +345,7 @@
                 <li class="menu-header mt-5 small text-uppercase">
                     <span class="menu-header-text">Pembimbing Akademik</span>
                 </li>
-                <li class="menu-item {{ request()->routeIs('dosen.perwalian.index') ? 'active' : '' }}">
+                <li class="menu-item {{ request()->routeIs('dosen.perwalian.*') ? 'active' : '' }}">
                     <a href="{{ route('dosen.perwalian.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons ri-group-line"></i>
                         <div data-i18n="Mahasiswa Bimbingan">Mahasiswa Bimbingan</div>

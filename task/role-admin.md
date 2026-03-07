@@ -1,0 +1,9 @@
+## Role Admin
+
+### Menu Persetujuan Surat Permohonan 
+- [ ] Tambah menu persetujuan Surat Permohonan.
+- [ ] Tambahkan badge setiap ada permintaan baru masuk. 
+
+### Refaktor 
+- [ ] Rapihkan tampilan sidebar pada menu admin dengan menggunakan nav-items collapse per kategori menu agar tidak terlalu banyak menu yang tampil pada sidebar admin. 
+
